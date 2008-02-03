@@ -1,0 +1,1 @@
+The PNG source files were made in Macromedia Fireworks.

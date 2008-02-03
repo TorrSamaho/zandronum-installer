@@ -1,1 +1,0 @@
-These source files were made in Macromedia Fireworks.
