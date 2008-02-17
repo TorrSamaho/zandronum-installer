@@ -60,7 +60,7 @@ UnInstPage custom un.nsUninstaller_create un.nsUninstaller_exit
 !insertmacro MUI_LANGUAGE English
 
 # EXE attributes
-VIProductVersion ${VERSION_NUM}.0.0.0
+VIProductVersion ${VERSION_NUM}.0.0.1
 OutFile skulltagSetup.exe
 InstallDir $PROGRAMFILES\Skulltag
 CRCCheck on
@@ -295,6 +295,7 @@ Section "Installer"
         File skulltag_files\getwad.dll
         File skulltag_files\IdeSE.exe
         File skulltag_files\ip2c.dll
+        File skulltag_files\Readme.txt        
         File skulltag_files\skulltag.exe
         File skulltag_files\skulltag.pk3
         File skulltag_files\skulltag.wad
@@ -351,7 +352,8 @@ Section "Uninstall"
         Delete /REBOOTOK fmod.dll
         Delete /REBOOTOK getwad.dll
         Delete /REBOOTOK IdeSE.exe
-        Delete /REBOOTOK ip2c.dll     
+        Delete /REBOOTOK ip2c.dll
+        Delete /REBOOTOK Readme.txt
         Delete /REBOOTOK skulltag.exe
         Delete /REBOOTOK skulltag.pk3    
         Delete /REBOOTOK skulltag.wad
