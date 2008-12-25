@@ -10,7 +10,7 @@
 # Build options
 !define RELEASEBUILD        # Always define this when doing a final build.
 !define VERSION_NUM 97
-!define VERSION 97d
+!define VERSION 97d3
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
