@@ -64,7 +64,7 @@ UnInstPage custom un.nsUninstaller_create un.nsUninstaller_exit
 
 # EXE attributes
 VIProductVersion ${VERSION_NUM}.0.0.1
-OutFile skulltagSetup.exe
+OutFile installer${VERSION}.exe
 InstallDir $PROGRAMFILES\Skulltag
 CRCCheck on
 XPStyle on
