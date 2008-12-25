@@ -1,11 +1,14 @@
-#=======================
-# Skulltag Installer v3
-# Copyright (c) 2008 Rivecoder
+#=================================================
 #
-#=======================
+# Skulltag Installer v3
+# Copyright (c) 2009 Rivecoder
+#
+# To add new files to the installer, go to [Section "Installer"] and [Section "Uninstall"].
+#
+#=================================================
 
 # Build options
-!define RELEASEBUILD        # Always set/uncomment when doing a final build.
+!define RELEASEBUILD        # Always define this when doing a final build.
 !define VERSION_NUM 97
 !define VERSION 97d
 
@@ -295,7 +298,7 @@ Section "Installer"
         File skulltag_files\getwad.dll
         File skulltag_files\IdeSE.exe
         File skulltag_files\ip2c.dll
-        File skulltag_files\Readme.txt        
+        File skulltag_files\Readme.txt
         File skulltag_files\skulltag.exe
         File skulltag_files\skulltag.pk3
         File skulltag_files\skulltag.wad
