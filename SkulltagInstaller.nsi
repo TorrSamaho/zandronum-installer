@@ -371,9 +371,12 @@ Section "Uninstall"
     
     # Delete shortcuts and the Add/Remove entry.
     ${If} $shouldRemoveShortcuts == 1
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Uninstall $(^Name).lnk"
         Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Singleplayer.lnk"
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Online.lnk"        
+        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Online.lnk"
+        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Manage server.lnk"
+        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Uninstall.lnk"
+        RmDir "$SMPROGRAMS\Skulltag\Tools"
+        RmDir "$SMPROGRAMS\Skulltag"
         DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     ${EndIf}
     
