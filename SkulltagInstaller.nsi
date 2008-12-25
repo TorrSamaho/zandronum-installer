@@ -312,6 +312,7 @@ Section "Installer"
     # Create start menu shortcuts.
     ${If} $shouldCreateShortcuts == 1
         SetOutPath $SMPROGRAMS\Skulltag
+        CreateDirectory $SMPROGRAMS\Skulltag\Tools
         CreateShortcut "Play Singleplayer.lnk" $INSTDIR\skulltag.exe
         CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe
         CreateShortcut "Tools\Manage server.lnk" $INSTDIR\rcon_utility.exe        
