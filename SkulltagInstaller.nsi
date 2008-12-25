@@ -285,6 +285,16 @@ FunctionEnd
     ${EndIf}
 !macroend
 
+#===================================================
+#
+# Creates internet shortcuts.
+#   Acquired 12/25/08 from http://nsis.sourceforge.net/CreateInternetShortcut_macro_&_function
+#
+#===================================================
+
+!macro CreateInternetShortcut FILENAME URL
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "URL" "${URL}"
+!macroend
 
 #--------------------------
 # The installation process.
@@ -312,11 +322,16 @@ Section "Installer"
     # Create start menu shortcuts.
     ${If} $shouldCreateShortcuts == 1
         SetOutPath $SMPROGRAMS\Skulltag
-        CreateDirectory $SMPROGRAMS\Skulltag\Tools
         CreateShortcut "Play Singleplayer.lnk" $INSTDIR\skulltag.exe
-        CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe
-        CreateShortcut "Tools\Manage server.lnk" $INSTDIR\rcon_utility.exe        
-        CreateShortcut "Tools\Uninstall.lnk" $INSTDIR\uninstall.exe
+        CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe        
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
+        
+        CreateDirectory $SMPROGRAMS\Skulltag\Tools
+        SetOutPath $SMPROGRAMS\Skulltag\Tools        
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Report a bug" "http://skulltag.com/bugs/"
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Request a feature" "http://skulltag.com/featurerequests/"
+        CreateShortcut "Manage server.lnk" $INSTDIR\rcon_utility.exe           
+        CreateShortcut "Uninstall.lnk" $INSTDIR\uninstall.exe
         
         # Add/Remove programs entry.
         WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayName "$(^Name)"
@@ -373,8 +388,12 @@ Section "Uninstall"
     ${If} $shouldRemoveShortcuts == 1
         Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Singleplayer.lnk"
         Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Online.lnk"
+        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Forum.url"        
         Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Manage server.lnk"
+        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Report a bug.url"
+        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Request a feature.url"
         Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Uninstall.lnk"
+      
         RmDir "$SMPROGRAMS\Skulltag\Tools"
         RmDir "$SMPROGRAMS\Skulltag"
         DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
