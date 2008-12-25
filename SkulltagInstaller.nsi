@@ -339,7 +339,7 @@ Section "Installer"
     DetailPrint "Creating exceptions in Windows Firewall..."    
     !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"       "Skulltag"
     !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"          "IdeSE"
-    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON utility"       
+    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
     
 SectionEnd
 
