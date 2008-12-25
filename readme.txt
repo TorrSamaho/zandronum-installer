@@ -2,11 +2,12 @@
  SKULLTAG INSTALLER v3
 -----------------------
 
-To BUILD the installer, place that the Skulltag files in skulltag_files. Run build.bat.
+To make the installer:
+  Unzip the windows zip into \skulltag_files and run build.bat.
 
-To ADD more files to the installer, you'll have to edit SkulltagInstaller.nsi.
-  They are listed in two places: in the installer section and the uninstaller section.
+To add more files to the installer:
+  See the header of SkulltagInstaller.nsi.
 
--Riveoder
+-Rivecoder
 
 
