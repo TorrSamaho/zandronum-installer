@@ -24,7 +24,10 @@ IP2C
   IP2C is a library which converts IP addresses to country information (names and flags).
   It is made by Kilgore: kilgore@zdaemon.org 
   
-  
+RCON utility
+  Made for server admins. Allows them to easily control their server.
+  It is made by Rivecoder: rivecoder at skulltag . com
+
 **********************
  Skulltag website
  
