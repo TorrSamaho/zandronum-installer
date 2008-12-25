@@ -299,6 +299,7 @@ Section "Installer"
         File skulltag_files\IdeSE.exe
         File skulltag_files\ip2c.dll
         File skulltag_files\Readme.txt
+        File skulltag_files\rcon_utility.exe               
         File skulltag_files\skulltag.exe
         File skulltag_files\skulltag.pk3
         File skulltag_files\skulltag.wad
@@ -313,7 +314,8 @@ Section "Installer"
         SetOutPath $SMPROGRAMS\Skulltag
         CreateShortcut "Play Singleplayer.lnk" $INSTDIR\skulltag.exe
         CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe
-        CreateShortcut "Uninstall $(^Name).lnk" $INSTDIR\uninstall.exe
+        CreateShortcut "Tools\Manage server.lnk" $INSTDIR\rcon_utility.exe        
+        CreateShortcut "Tools\Uninstall.lnk" $INSTDIR\uninstall.exe
         
         # Add/Remove programs entry.
         WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayName "$(^Name)"
@@ -335,8 +337,9 @@ Section "Installer"
     
     # Create exceptions in Windows Firewall. (All Networks - All IP Version - Enabled)
     DetailPrint "Creating exceptions in Windows Firewall..."    
-    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe" "Skulltag"
-    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"    "IdeSE"    
+    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"       "Skulltag"
+    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"          "IdeSE"
+    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON utility"       
     
 SectionEnd
 
@@ -357,6 +360,7 @@ Section "Uninstall"
         Delete /REBOOTOK IdeSE.exe
         Delete /REBOOTOK ip2c.dll
         Delete /REBOOTOK Readme.txt
+        Delete /REBOOTOK rcon_utility.exe
         Delete /REBOOTOK skulltag.exe
         Delete /REBOOTOK skulltag.pk3    
         Delete /REBOOTOK skulltag.wad
@@ -379,8 +383,10 @@ Section "Uninstall"
     ${EndIf}
     
     # Remove firewall exceptions.
-    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe" "Skulltag"
-    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"    "IdeSE"
+    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"        "Skulltag"
+    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"           "IdeSE"
+    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"    "RCON utiliy"    
+    
     
     # Remove the folders if they're completely empty.
     RmDir /REBOOTOK $SMPROGRAMS\Skulltag
