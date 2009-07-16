@@ -22,8 +22,8 @@ Finish page (implemented using nsDialogs)
     
     Var mui.FinishPage.Text
   !endif
- 
-  !ifndef MUI_FINISHPAGE_NOREBOORTSUPPORT
+
+  !ifndef MUI_FINISHPAGE_NOREBOOTSUPPORT
     !ifndef MUI_FINISHPAGE_RETURNVALUE_VARIABLES
       !define MUI_FINISHPAGE_RETURNVALUE_VARIABLES
       Var mui.FinishPage.ReturnValue
@@ -71,9 +71,7 @@ Finish page (implemented using nsDialogs)
     !endif
   !endif
 
-  !ifndef MUI_${MUI_PAGE_UNINSTALLER_PREFIX}WELCOMEFINISHPAGE_BITMAPS
-    !insertmacro MUI_DEFAULT MUI_${MUI_PAGE_UNINSTALLER_PREFIX}WELCOMEFINISHPAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Wizard\win.bmp"  
-  !endif
+  !insertmacro MUI_DEFAULT MUI_${MUI_PAGE_UNINSTALLER_PREFIX}WELCOMEFINISHPAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Wizard\win.bmp"  
 
 !macroend
 
@@ -254,21 +252,23 @@ Finish page (implemented using nsDialogs)
     
     ;Enable cancel button if set in script
     !ifdef MUI_FINISHPAGE_CANCEL_ENABLED
-      EnableWindow $mui.Button.Next 1
+      EnableWindow $mui.Button.Cancel 1
     !endif
     
     ;Create dialog
-    nsDialogs::Create /NOUNLOAD 1044
+    nsDialogs::Create 1044
     Pop $mui.FinishPage
-    nsDialogs::SetRTL /NOUNLOAD $(^RTL)
+    nsDialogs::SetRTL $(^RTL)
     SetCtlColors $mui.FinishPage "" "${MUI_BGCOLOR}"
 
     ;Image control
     ${NSD_CreateBitmap} 0u 0u 109u 193u ""
     Pop $mui.FinishPage.Image
-    System::Call 'user32::LoadImage(i 0, t "$PLUGINSDIR\modern-wizard.bmp", i ${IMAGE_BITMAP}, i 0, i 0, i ${LR_LOADFROMFILE}) i.s'
-    Pop $mui.FinishPage.Image.Bitmap
-    SendMessage $mui.FinishPage.Image ${STM_SETIMAGE} ${IMAGE_BITMAP} $mui.FinishPage.Image.Bitmap
+    !ifndef MUI_${MUI_PAGE_UNINSTALLER_PREFIX}WELCOMEFINISHPAGE_BITMAP_NOSTRETCH
+      ${NSD_SetStretchedImage} $mui.FinishPage.Image $PLUGINSDIR\modern-wizard.bmp $mui.FinishPage.Image.Bitmap
+    !else
+      ${NSD_SetImage} $mui.FinishPage.Image $PLUGINSDIR\modern-wizard.bmp $mui.FinishPage.Image.Bitmap
+    !endif
     
     ;Positiong of controls
 
@@ -344,6 +344,12 @@ Finish page (implemented using nsDialogs)
         ${NSD_CreateRadioButton} 120u ${MUI_FINISHPAGE_REBOOTLATER_TOP}u 195u 10u "${MUI_FINISHPAGE_TEXT_REBOOTLATER}"
         Pop $mui.FinishPage.RebootLater
         SetCtlColors $mui.FinishPage.RebootLater "" "${MUI_BGCOLOR}"
+        !ifndef MUI_FINISHPAGE_REBOOTLATER_DEFAULT
+          SendMessage $mui.FinishPage.RebootNow ${BM_SETCHECK} ${BST_CHECKED} 0
+        !else
+          SendMessage $mui.FinishPage.RebootLater ${BM_SETCHECK} ${BST_CHECKED} 0
+        !endif
+        ${NSD_SetFocus} $mui.FinishPage.RebootNow
 
       ${else}
 
@@ -373,6 +379,7 @@ Finish page (implemented using nsDialogs)
           !ifndef MUI_FINISHPAGE_RUN_NOTCHECKED
             SendMessage $mui.FinishPage.Run ${BM_SETCHECK} ${BST_CHECKED} 0
           !endif
+          ${NSD_SetFocus} $mui.FinishPage.Run
         !endif
         !ifdef MUI_FINISHPAGE_SHOWREADME
           ${NSD_CreateCheckbox} 120u ${MUI_FINISHPAGE_SHOWREADME_TOP}u 195u 10u "${MUI_FINISHPAGE_SHOWREADME_TEXT}"
@@ -380,6 +387,9 @@ Finish page (implemented using nsDialogs)
           SetCtlColors $mui.FinishPage.ShowReadme "" "${MUI_BGCOLOR}"
           !ifndef MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
             SendMessage $mui.FinishPage.ShowReadme ${BM_SETCHECK} ${BST_CHECKED} 0
+          !endif
+          !ifndef MUI_FINISHPAGE_RUN
+            ${NSD_SetFocus} $mui.FinishPage.ShowReadme
           !endif
         !endif
     
@@ -394,8 +404,6 @@ Finish page (implemented using nsDialogs)
     !ifndef MUI_FINISHPAGE_NOREBOOTSUPPORT        
       ${endif}
     !endif
-
-    !insertmacro MUI_PAGE_FUNCTION_CUSTOM SHOW
 
     !ifdef MUI_FINISHPAGE_CANCEL_ENABLED
       StrCpy $mui.FinishPage.DisableAbortWarning "1"
@@ -412,7 +420,7 @@ Finish page (implemented using nsDialogs)
     !endif
     
     ;Delete image from memory
-    System::Call gdi32::DeleteObject(i$mui.FinishPage.Image.Bitmap)
+    ${NSD_FreeImage} $mui.FinishPage.Image.Bitmap
     
     !insertmacro MUI_UNSET MUI_FINISHPAGE_TITLE_HEIGHT
     !insertmacro MUI_UNSET MUI_FINISHPAGE_TEXT_TOP

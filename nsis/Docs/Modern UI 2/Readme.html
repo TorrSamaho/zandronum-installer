@@ -209,7 +209,7 @@
                             <li>The macros for InstallOptions have been moved to a separate header file unrelated
                                 to the Modern UI. If you are still using InstallOptions for custom pages, insert
                                 InstallOptions.nsh and use the INSTALLOPTIONS_* macros instead of the MUI_INSTALLOPTIONS_*
-                                macros. The macros itself have remained the same.</li>
+                                macros. The macros themselves have remained the same.</li>
                             <li>Rewrite customization code for the Modern UI 1.8 welcome and finish pages in which
                                 the InstallOptions INI file is used. nsDialogs commands should be used instead.</li>
                             <li>Use the standard NSIS method to escape special characters in all texts. For example,
@@ -546,7 +546,7 @@
 !insertmacro MUI_PAGE_LICENSE &quot;License.rtf&quot;
 !insertmacro MUI_PAGE_COMPONENTS
 
-Var STARTMENU_FOLDER
+Var StartMenuFolder
 !insertmacro MUI_PAGE_STARTMENU &quot;Application&quot; $StartMenuFolder
 </pre>
                         <p>
@@ -1069,8 +1069,12 @@ FunctionEnd</pre>
                                 <strong>MUI_CUSTOMFUNCTION_UNGUIINIT</strong> <span class="parameter">function</span><br />
                                 <strong>MUI_CUSTOMFUNCTION_ABORT</strong> <span class="parameter">function</span><br />
                                 <strong>MUI_CUSTOMFUNCTION_UNABORT</strong> <span class="parameter">function</span><br />
-                                <strong>MUI_CUSTOMFUNCTION_MOUSEOVERSECTION</strong> <span class="parameter">function</span><br />
-                                <strong>MUI_CUSTOMFUNCTION_UNMOUSEOVERSECTION</strong> <span class="parameter">function</span></p>
+                                <strong>MUI_CUSTOMFUNCTION_ONMOUSEOVERSECTION</strong> <span class="parameter">function</span><br />
+                                <strong>MUI_CUSTOMFUNCTION_UNONMOUSEOVERSECTION</strong> <span class="parameter">function</span></p>
+							<p>
+                                Mouse over functions are only available when the description macros
+								(MUI_FUNCTION_DESCRIPTION_BEGIN) are used. When component page descriptions are not
+								used, regular .onMouseOverSection and un.onMouseOverSection must be used.</p>
                         </div>
                         <h3>
                             <img class="trigger" alt="Open/Close section" id="trigger_cfpg" src="images/closed.gif"
@@ -1082,12 +1086,13 @@ FunctionEnd</pre>
                             <p>
                                 <strong>MUI_PAGE_CUSTOMFUNCTION_PRE</strong> <span class="parameter">function</span><br />
                                 <strong>MUI_PAGE_CUSTOMFUNCTION_SHOW</strong> <span class="parameter">function</span><br />
+                                <strong>MUI_PAGE_CUSTOMFUNCTION_LEAVE</strong> <span class="parameter">function</span><br />
                             </p>
                             <p>
                                 The pre function is called first and allows you to initalize variables or decide
-                                wehther the page should be skipped. Then, the shown function is called, which can
-                                be used to customize the interface. Finally, the user input can be validated leave
-                                function. The NSIS Users Manual provides more information about these funtions.</p>
+                                whether the page should be skipped. Then, the show function is called, which can
+                                be used to customize the interface. Finally, the user input can be validated in the
+								leave function. The NSIS Users Manual provides more information about these functions.</p>
                             <p>
                                 In the show function, the window handles of all controls on the page can be retrieved
                                 from a Modern UI variable. A list of the variables names is not yet available. For
@@ -1098,9 +1103,6 @@ FunctionEnd</pre>
                     <h1>
                         <a name="examples" id="examples">Example scripts</a></h1>
                     <div>
-                        <p>
-                            The example scripts do not use the Modern UI 2.0 yet. To can upgrade any example
-                            (except InstallOptions.nsi) by inserting the MUI2.nsh header file instead of MUI.nsh.</p>
                         <p>
                             Basic: <a href="../../Examples/Modern%20UI/Basic.nsi">Basic.nsi</a><br />
                             Welcome/Finish page: <a href="../../Examples/Modern%20UI/WelcomeFinish.nsi">WelcomeFinish.nsi</a><br />
@@ -1127,7 +1129,7 @@ FunctionEnd</pre>
                             License Terms</h3>
                         <div class="toggle" id="toggle_lic">
                             <pre>
-Copyright &copy; 2002-2008 Joost Verburg
+Copyright &copy; 2002-2009 Joost Verburg
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages

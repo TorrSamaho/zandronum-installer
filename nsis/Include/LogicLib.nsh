@@ -15,11 +15,11 @@
 ;       If|IfNot|Unless..{ElseIf|ElseIfNot|ElseUnless}..[Else]..EndIf|EndUnless
 ;         - Conditionally executes a block of statements, depending on the value
 ;           of an expression. IfNot and Unless are equivalent and
-;           interchangeable.
+;           interchangeable, as are ElseIfNot and ElseUnless.
 ;       AndIf|AndIfNot|AndUnless|OrIf|OrIfNot|OrUnless
 ;         - Adds any number of extra conditions to If, IfNot, Unless, ElseIf,
 ;           ElseIfNot and ElseUnless statements.
-;       IfThen..|..|
+;       IfThen|IfNotThen..|..|
 ;         - Conditionally executes an inline statement, depending on the value
 ;           of an expression.
 ;       IfCmd..||..|
@@ -460,6 +460,16 @@
     !verbose pop
   !macroend
   !define IfThen `!insertmacro _IfThen`
+
+  !macro _IfNotThen _a _o _b _t
+    !verbose push
+    !verbose ${LOGICLIB_VERBOSITY}
+    ${IfNot} `${_a}` `${_o}` `${_b}`
+      ${_t}
+    ${EndIf}
+    !verbose pop
+  !macroend
+  !define IfNotThen `!insertmacro _IfNotThen`
 
   !macro _ForEach _v _f _t _o _s
     !verbose push

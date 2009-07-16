@@ -5,6 +5,11 @@ Header file for creating custom installer pages with nsDialogs
 
 */
 
+!ifndef NSDIALOGS_INCLUDED
+!define NSDIALOGS_INCLUDED
+!verbose push
+!verbose 3
+
 !include LogicLib.nsh
 !include WinMessages.nsh
 
@@ -166,6 +171,9 @@ Header file for creating custom installer pages with nsDialogs
 !define IMAGE_CURSOR        2
 !define IMAGE_ENHMETAFILE   3
 
+!define GWL_STYLE           -16
+!define GWL_EXSTYLE         -20
+
 !define DEFAULT_STYLES ${WS_CHILD}|${WS_VISIBLE}|${WS_CLIPSIBLINGS}
 
 !define __NSD_HLine_CLASS STATIC
@@ -177,22 +185,22 @@ Header file for creating custom installer pages with nsDialogs
 !define __NSD_VLine_EXSTYLE ${WS_EX_TRANSPARENT}
 
 !define __NSD_Label_CLASS STATIC
-!define __NSD_Label_STYLE ${DEFAULT_STYLES}
+!define __NSD_Label_STYLE ${DEFAULT_STYLES}|${SS_NOTIFY}
 !define __NSD_Label_EXSTYLE ${WS_EX_TRANSPARENT}
 
 !define __NSD_Icon_CLASS STATIC
-!define __NSD_Icon_STYLE ${DEFAULT_STYLES}|${SS_ICON}
+!define __NSD_Icon_STYLE ${DEFAULT_STYLES}|${SS_ICON}|${SS_NOTIFY}
 !define __NSD_Icon_EXSTYLE 0
 
 !define __NSD_Bitmap_CLASS STATIC
-!define __NSD_Bitmap_STYLE ${DEFAULT_STYLES}|${SS_BITMAP}
+!define __NSD_Bitmap_STYLE ${DEFAULT_STYLES}|${SS_BITMAP}|${SS_NOTIFY}
 !define __NSD_Bitmap_EXSTYLE 0
 
 !define __NSD_BrowseButton_CLASS BUTTON
 !define __NSD_BrowseButton_STYLE ${DEFAULT_STYLES}|${WS_TABSTOP}
 !define __NSD_BrowseButton_EXSTYLE 0
 
-!define __NSD_Link_CLASS BUTTON
+!define __NSD_Link_CLASS LINK
 !define __NSD_Link_STYLE ${DEFAULT_STYLES}|${WS_TABSTOP}|${BS_OWNERDRAW}
 !define __NSD_Link_EXSTYLE 0
 
@@ -220,6 +228,10 @@ Header file for creating custom installer pages with nsDialogs
 !define __NSD_Password_STYLE ${DEFAULT_STYLES}|${WS_TABSTOP}|${ES_AUTOHSCROLL}|${ES_PASSWORD}
 !define __NSD_Password_EXSTYLE ${WS_EX_WINDOWEDGE}|${WS_EX_CLIENTEDGE}
 
+!define __NSD_Number_CLASS EDIT
+!define __NSD_Number_STYLE ${DEFAULT_STYLES}|${WS_TABSTOP}|${ES_AUTOHSCROLL}|${ES_NUMBER}
+!define __NSD_Number_EXSTYLE ${WS_EX_WINDOWEDGE}|${WS_EX_CLIENTEDGE}
+
 !define __NSD_FileRequest_CLASS EDIT
 !define __NSD_FileRequest_STYLE ${DEFAULT_STYLES}|${WS_TABSTOP}|${ES_AUTOHSCROLL}
 !define __NSD_FileRequest_EXSTYLE ${WS_EX_WINDOWEDGE}|${WS_EX_CLIENTEDGE}
@@ -240,9 +252,13 @@ Header file for creating custom installer pages with nsDialogs
 !define __NSD_ListBox_STYLE ${DEFAULT_STYLES}|${WS_TABSTOP}|${WS_VSCROLL}|${LBS_DISABLENOSCROLL}|${LBS_HASSTRINGS}|${LBS_NOINTEGRALHEIGHT}|${LBS_NOTIFY}
 !define __NSD_ListBox_EXSTYLE ${WS_EX_WINDOWEDGE}|${WS_EX_CLIENTEDGE}
 
+!define __NSD_ProgressBar_CLASS msctls_progress32
+!define __NSD_ProgressBar_STYLE ${DEFAULT_STYLES}
+!define __NSD_ProgressBar_EXSTYLE ${WS_EX_WINDOWEDGE}|${WS_EX_CLIENTEDGE}
+
 !macro __NSD_DefineControl NAME
 
-	!define NSD_Create${NAME} "nsDialogs::CreateControl /NOUNLOAD ${__NSD_${Name}_CLASS} ${__NSD_${Name}_STYLE} ${__NSD_${Name}_EXSTYLE}"
+	!define NSD_Create${NAME} "nsDialogs::CreateControl ${__NSD_${Name}_CLASS} ${__NSD_${Name}_STYLE} ${__NSD_${Name}_EXSTYLE}"
 
 !macroend
 
@@ -259,13 +275,15 @@ Header file for creating custom installer pages with nsDialogs
 !insertmacro __NSD_DefineControl RadioButton
 !insertmacro __NSD_DefineControl Text
 !insertmacro __NSD_DefineControl Password
+!insertmacro __NSD_DefineControl Number
 !insertmacro __NSD_DefineControl FileRequest
 !insertmacro __NSD_DefineControl DirRequest
 !insertmacro __NSD_DefineControl ComboBox
 !insertmacro __NSD_DefineControl DropList
 !insertmacro __NSD_DefineControl ListBox
+!insertmacro __NSD_DefineControl ProgressBar
 
-!macro __NSD_OnEvent EVENT HWND FUNCTION
+!macro __NSD_OnControlEvent EVENT HWND FUNCTION
 
 	Push $0
 	Push $1
@@ -273,23 +291,92 @@ Header file for creating custom installer pages with nsDialogs
 	StrCpy $1 "${HWND}"
 
 	GetFunctionAddress $0 "${FUNCTION}"
-	nsDialogs::On${EVENT} /NOUNLOAD $1 $0
+	nsDialogs::On${EVENT} $1 $0
 
 	Pop $1
 	Pop $0
 
 !macroend
 
-!macro __NSD_DefineCallback EVENT
+!macro __NSD_DefineControlCallback EVENT
 
-	!define NSD_On${EVENT} `!insertmacro __NSD_OnEvent ${EVENT}`
+	!define NSD_On${EVENT} `!insertmacro __NSD_OnControlEvent ${EVENT}`
 
 !macroend
 
-!insertmacro __NSD_DefineCallback Click
-!insertmacro __NSD_DefineCallback Change
-!insertmacro __NSD_DefineCallback Notify
-!insertmacro __NSD_DefineCallback Back
+!macro __NSD_OnDialogEvent EVENT FUNCTION
+
+	Push $0
+
+	GetFunctionAddress $0 "${FUNCTION}"
+	nsDialogs::On${EVENT} $0
+
+	Pop $0
+
+!macroend
+
+!macro __NSD_DefineDialogCallback EVENT
+
+	!define NSD_On${EVENT} `!insertmacro __NSD_OnDialogEvent ${EVENT}`
+
+!macroend
+
+!insertmacro __NSD_DefineControlCallback Click
+!insertmacro __NSD_DefineControlCallback Change
+!insertmacro __NSD_DefineControlCallback Notify
+!insertmacro __NSD_DefineDialogCallback Back
+
+!macro _NSD_CreateTimer FUNCTION INTERVAL
+
+	Push $0
+
+	GetFunctionAddress $0 "${FUNCTION}"
+	nsDialogs::CreateTimer $0 "${INTERVAL}"
+
+	Pop $0
+
+!macroend
+
+!define NSD_CreateTimer `!insertmacro _NSD_CreateTimer`
+
+!macro _NSD_KillTimer FUNCTION
+
+	Push $0
+
+	GetFunctionAddress $0 "${FUNCTION}"
+	nsDialogs::KillTimer $0
+
+	Pop $0
+
+!macroend
+
+!define NSD_KillTimer `!insertmacro _NSD_KillTimer`
+
+!macro _NSD_AddStyle CONTROL STYLE
+
+	Push $0
+
+	System::Call "user32::GetWindowLong(i ${CONTROL}, i ${GWL_STYLE}) i .r0"
+	System::Call "user32::SetWindowLong(i ${CONTROL}, i ${GWL_STYLE}, i $0|${STYLE})"
+
+	Pop $0
+
+!macroend
+
+!define NSD_AddStyle "!insertmacro _NSD_AddStyle"
+
+!macro _NSD_AddExStyle CONTROL EXSTYLE
+
+	Push $0
+
+	System::Call "user32::GetWindowLong(i ${CONTROL}, i ${GWL_EXSTYLE}) i .r0"
+	System::Call "user32::SetWindowLong(i ${CONTROL}, i ${GWL_EXSTYLE}, i $0|${EXSTYLE})"
+
+	Pop $0
+
+!macroend
+
+!define NSD_AddExStyle "!insertmacro _NSD_AddExStyle"
 
 !macro __NSD_GetText CONTROL VAR
 
@@ -300,6 +387,22 @@ Header file for creating custom installer pages with nsDialogs
 
 !define NSD_GetText `!insertmacro __NSD_GetText`
 
+!macro __NSD_SetText CONTROL TEXT
+
+	SendMessage ${CONTROL} ${WM_SETTEXT} 0 `STR:${TEXT}`
+
+!macroend
+
+!define NSD_SetText `!insertmacro __NSD_SetText`
+
+!macro _NSD_SetTextLimit CONTROL LIMIT
+
+	SendMessage ${CONTROL} ${EM_SETLIMITTEXT} ${LIMIT} 0
+
+!macroend
+
+!define NSD_SetTextLimit "!insertmacro _NSD_SetTextLimit"
+
 !macro __NSD_GetState CONTROL VAR
 
 	SendMessage ${CONTROL} ${BM_GETCHECK} 0 0 ${VAR}
@@ -308,6 +411,30 @@ Header file for creating custom installer pages with nsDialogs
 
 !define NSD_GetState `!insertmacro __NSD_GetState`
 
+!macro __NSD_SetState CONTROL STATE
+
+	SendMessage ${CONTROL} ${BM_SETCHECK} ${STATE} 0
+
+!macroend
+
+!define NSD_SetState `!insertmacro __NSD_SetState`
+
+!macro __NSD_Check CONTROL
+
+	${NSD_SetState} ${CONTROL} ${BST_CHECKED}
+
+!macroend
+
+!define NSD_Check `!insertmacro __NSD_Check`
+
+!macro __NSD_Uncheck CONTROL
+
+	${NSD_SetState} ${CONTROL} ${BST_UNCHECKED}
+
+!macroend
+
+!define NSD_Uncheck `!insertmacro __NSD_Uncheck`
+
 !macro __NSD_SetFocus HWND
 
 	System::Call "user32::SetFocus(i${HWND})"
@@ -315,6 +442,181 @@ Header file for creating custom installer pages with nsDialogs
 !macroend
 
 !define NSD_SetFocus `!insertmacro __NSD_SetFocus`
+
+!macro _NSD_CB_AddString CONTROL STRING
+
+	SendMessage ${CONTROL} ${CB_ADDSTRING} 0 `STR:${STRING}`
+
+!macroend
+
+!define NSD_CB_AddString "!insertmacro _NSD_CB_AddString"
+
+!macro _NSD_CB_SelectString CONTROL STRING
+
+	SendMessage ${CONTROL} ${CB_SELECTSTRING} -1 `STR:${STRING}`
+
+!macroend
+
+!define NSD_CB_SelectString "!insertmacro _NSD_CB_SelectString"
+
+!macro _NSD_LB_AddString CONTROL STRING
+
+	SendMessage ${CONTROL} ${LB_ADDSTRING} 0 `STR:${STRING}`
+
+!macroend
+
+!define NSD_LB_AddString "!insertmacro _NSD_LB_AddString"
+
+!macro __NSD_LB_DelString CONTROL STRING
+
+	SendMessage ${CONTROL} ${LB_DELETESTRING} 0 `STR:${STRING}`
+
+!macroend
+
+!define NSD_LB_DelString `!insertmacro __NSD_LB_DelString`
+
+!macro __NSD_LB_Clear CONTROL VAR
+
+	SendMessage ${CONTROL} ${LB_RESETCONTENT} 0 0 ${VAR}
+
+!macroend
+
+!define NSD_LB_Clear `!insertmacro __NSD_LB_Clear`
+
+!macro __NSD_LB_GetCount CONTROL VAR
+
+	SendMessage ${CONTROL} ${LB_GETCOUNT} 0 0 ${VAR}
+
+!macroend
+
+!define NSD_LB_GetCount `!insertmacro __NSD_LB_GetCount`
+
+!macro _NSD_LB_SelectString CONTROL STRING
+
+	SendMessage ${CONTROL} ${LB_SELECTSTRING} -1 `STR:${STRING}`
+
+!macroend
+
+!define NSD_LB_SelectString "!insertmacro _NSD_LB_SelectString"
+
+!macro __NSD_LB_GetSelection CONTROL VAR
+
+	SendMessage ${CONTROL} ${LB_GETCURSEL} 0 0 ${VAR}
+	System::Call 'user32::SendMessage(i ${CONTROL}, i ${LB_GETTEXT}, i ${VAR}, t .s)'
+	Pop ${VAR}
+
+!macroend
+
+!define NSD_LB_GetSelection `!insertmacro __NSD_LB_GetSelection`
+
+
+!macro __NSD_LoadAndSetImage _LIHINSTMODE _IMGTYPE _LIHINSTSRC _LIFLAGS CONTROL IMAGE HANDLE
+	
+	Push $0
+	Push $R0
+
+	StrCpy $R0 ${CONTROL} # in case ${CONTROL} is $0
+	
+	!if "${_LIHINSTMODE}" == "exeresource"
+		System::Call 'kernel32::GetModuleHandle(i0) i.r0'
+		!undef _LIHINSTSRC
+		!define _LIHINSTSRC r0
+	!endif
+	
+	System::Call 'user32::LoadImage(i ${_LIHINSTSRC}, ts, i ${_IMGTYPE}, i0, i0, i${_LIFLAGS}) i.r0' "${IMAGE}"
+	SendMessage $R0 ${STM_SETIMAGE} ${_IMGTYPE} $0
+
+	Pop $R0
+	Exch $0
+
+	Pop ${HANDLE}
+
+!macroend
+
+!macro __NSD_SetIconFromExeResource CONTROL IMAGE HANDLE
+	!insertmacro __NSD_LoadAndSetImage exeresource ${IMAGE_ICON} 0 ${LR_DEFAULTSIZE} "${CONTROL}" "${IMAGE}" ${HANDLE}
+!macroend
+
+!macro __NSD_SetIconFromInstaller CONTROL HANDLE
+	!insertmacro __NSD_SetIconFromExeResource "${CONTROL}" "#103" ${HANDLE}
+!macroend
+
+!define NSD_SetImage `!insertmacro __NSD_LoadAndSetImage file ${IMAGE_BITMAP} 0 "${LR_LOADFROMFILE}"`
+!define NSD_SetBitmap `${NSD_SetImage}`
+
+!define NSD_SetIcon `!insertmacro __NSD_LoadAndSetImage file ${IMAGE_ICON} 0 "${LR_LOADFROMFILE}|${LR_DEFAULTSIZE}"`
+!define NSD_SetIconFromExeResource `!insertmacro __NSD_SetIconFromExeResource`
+!define NSD_SetIconFromInstaller `!insertmacro __NSD_SetIconFromInstaller`
+
+
+!macro __NSD_SetStretchedImage CONTROL IMAGE HANDLE
+
+	Push $0
+	Push $1
+	Push $2
+	Push $R0
+
+	StrCpy $R0 ${CONTROL} # in case ${CONTROL} is $0
+
+	StrCpy $1 ""
+	StrCpy $2 ""
+
+	System::Call '*(i, i, i, i) i.s'
+	Pop $0
+
+	${If} $0 <> 0
+	
+		System::Call 'user32::GetClientRect(iR0, ir0)'
+		System::Call '*$0(i, i, i .s, i .s)'
+		System::Free $0
+		Pop $1
+		Pop $2
+
+	${EndIf}
+
+	System::Call 'user32::LoadImage(i0, ts, i ${IMAGE_BITMAP}, ir1, ir2, i${LR_LOADFROMFILE}) i.s' "${IMAGE}"
+	Pop $0
+    SendMessage $R0 ${STM_SETIMAGE} ${IMAGE_BITMAP} $0
+
+	Pop $R0
+	Pop $2
+	Pop $1
+	Exch $0
+
+	Pop ${HANDLE}
+
+!macroend
+
+!define NSD_SetStretchedImage `!insertmacro __NSD_SetStretchedImage`
+
+!macro __NSD_FreeImage IMAGE
+
+	${If} ${IMAGE} <> 0
+
+		System::Call gdi32::DeleteObject(is) ${IMAGE}
+
+	${EndIf}
+
+!macroend
+
+!define NSD_FreeImage `!insertmacro __NSD_FreeImage`
+!define NSD_FreeBitmap `${NSD_FreeImage}`
+
+!macro __NSD_FreeIcon IMAGE
+	System::Call user32::DestroyIcon(is) ${IMAGE}
+!macroend
+
+!define NSD_FreeIcon `!insertmacro __NSD_FreeIcon`
+
+!macro __NSD_ClearImage _IMGTYPE CONTROL
+
+	SendMessage ${CONTROL} ${STM_SETIMAGE} ${_IMGTYPE} 0
+
+!macroend
+
+!define NSD_ClearImage `!insertmacro __NSD_ClearImage ${IMAGE_BITMAP}`
+!define NSD_ClearIcon  `!insertmacro __NSD_ClearImage ${IMAGE_ICON}`
+
 
 !define DEBUG `System::Call kernel32::OutputDebugString(ts)`
 
@@ -360,11 +662,11 @@ Header file for creating custom installer pages with nsDialogs
 			StrCpy $R0 1018
 		${EndIf}
 
-		nsDialogs::Create /NOUNLOAD $R0
+		nsDialogs::Create $R0
 		Pop $R9
 
 		ReadINIStr $R0 $0 Settings RTL
-		nsDialogs::SetRTL /NOUNLOAD $R0
+		nsDialogs::SetRTL $R0
 
 		ReadINIStr $R0 $0 Settings NumFields
 
@@ -452,7 +754,7 @@ Header file for creating custom installer pages with nsDialogs
 		${NSD_CreateBrowseButton} $R8u $R4u 15u $R6u ...
 		Pop $R8
 
-		nsDialogs::SetUserData /NOUNLOAD $R8 $R1 # remember field id
+		nsDialogs::SetUserData $R8 $R1 # remember field id
 
 		WriteINIStr $0 "Field $R1" HWND2 $R8
 
@@ -473,7 +775,7 @@ Header file for creating custom installer pages with nsDialogs
 		${NSD_CreateBrowseButton} $R8u $R4u 15u $R6u ...
 		Pop $R8
 
-		nsDialogs::SetUserData /NOUNLOAD $R8 $R1 # remember field id
+		nsDialogs::SetUserData $R8 $R1 # remember field id
 
 		WriteINIStr $0 "Field $R1" HWND2 $R8
 
@@ -490,7 +792,7 @@ Header file for creating custom installer pages with nsDialogs
 
 		Pop $R0
 
-		nsDialogs::GetUserData /NOUNLOAD $R0
+		nsDialogs::GetUserData $R0
 		Pop $R1
 
 		ReadINIStr $R2 $0 "Field $R1" HWND
@@ -498,7 +800,7 @@ Header file for creating custom installer pages with nsDialogs
 
 		${NSD_GetText} $R2 $R3
 
-		nsDialogs::SelectFileDialog /NOUNLOAD save $R3 $R4
+		nsDialogs::SelectFileDialog save $R3 $R4
 		Pop $R3
 
 		${If} $R3 != ""
@@ -511,7 +813,7 @@ Header file for creating custom installer pages with nsDialogs
 
 		Pop $R0
 
-		nsDialogs::GetUserData /NOUNLOAD $R0
+		nsDialogs::GetUserData $R0
 		Pop $R1
 
 		ReadINIStr $R2 $0 "Field $R1" HWND
@@ -519,7 +821,7 @@ Header file for creating custom installer pages with nsDialogs
 
 		${NSD_GetText} $R2 $R4
 
-		nsDialogs::SelectFolderDialog /NOUNLOAD $R3 $R4
+		nsDialogs::SelectFolderDialog $R3 $R4
 		Pop $R3
 
 		${If} $R3 != error
@@ -533,7 +835,7 @@ Header file for creating custom installer pages with nsDialogs
 		${NSD_CreateLink} $R3u $R4u $R5u $R6u $R7
 		Pop $R9
 
-		nsDialogs::SetUserData /NOUNLOAD $R9 $R1 # remember field id
+		nsDialogs::SetUserData $R9 $R1 # remember field id
 
 		${NSD_OnClick} $R9 ${UNINSTALLER_FUNCPREFIX}OnLink
 
@@ -543,7 +845,7 @@ Header file for creating custom installer pages with nsDialogs
 
 		Pop $R0
 
-		nsDialogs::GetUserData /NOUNLOAD $R0
+		nsDialogs::GetUserData $R0
 		Pop $R1
 
 		ReadINIStr $R1 $0 "Field $R1" STATE
@@ -553,3 +855,6 @@ Header file for creating custom installer pages with nsDialogs
 	FunctionEnd
 
 !macroend
+
+!verbose pop
+!endif
