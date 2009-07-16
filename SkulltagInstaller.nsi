@@ -326,6 +326,9 @@ Section "Installer"
         CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe        
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
         
+        # Desktop shortcut.
+        CreateShortcut "$DESKTOP\Skulltag.lnk" $INSTDIR\IdeSE.exe
+        
         CreateDirectory $SMPROGRAMS\Skulltag\Tools
         SetOutPath $SMPROGRAMS\Skulltag\Tools        
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Report a bug" "http://skulltag.com/bugs/"
