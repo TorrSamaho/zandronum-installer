@@ -317,7 +317,13 @@ Section "Installer"
         File skulltag_files\skulltag.pk3
         File skulltag_files\skulltag.wad
         File "skulltag_files\Skulltag Version History.txt"
-    !endif
+        
+        # Copy the chat directory
+        SetOutPath $INSTDIR\chat
+        File /r skulltag_files\chat\*.*
+        
+        SetOutPath $INSTDIR
+    !endif    
 
     # Create the uninstaller.
     WriteUninstaller $INSTDIR\uninstall.exe
@@ -327,6 +333,7 @@ Section "Installer"
         SetOutPath $SMPROGRAMS\Skulltag
         CreateShortcut "Play Singleplayer.lnk" $INSTDIR\skulltag.exe
         CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe        
+        CreateShortcut "Chat with Skulltaggers.lnk" $INSTDIR\chat\Nettalk.exe
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
         
         # Desktop shortcut.
@@ -388,6 +395,32 @@ Section "Uninstall"
         Delete /REBOOTOK skulltag.wad
         Delete /REBOOTOK "Skulltag Version History.txt"
         Delete /REBOOTOK uninstall.exe
+        
+        # Uninstall chat...
+        SetOutPath $INSTDIR\chat
+        Delete /REBOOTOK Deutsch.lng
+        Delete /REBOOTOK English.lng
+        Delete /REBOOTOK Language.ini
+        Delete /REBOOTOK Magyar.lng
+        Delete /REBOOTOK Msg.wav
+        Delete /REBOOTOK Nederlands.lng
+        Delete /REBOOTOK Nettalk.exe
+        Delete /REBOOTOK Nettalk.ini
+        Delete /REBOOTOK Nettalkgb.jpg
+        Delete /REBOOTOK PORT.DLL
+        Delete /REBOOTOK Runmode.ini
+        Delete /REBOOTOK Russian.lng
+        Delete /REBOOTOK servers.ini
+        Delete /REBOOTOK ShortCut.txt
+        Delete /REBOOTOK "Simplified Chinese.lng"
+        Delete /REBOOTOK Spanish.lng
+        
+        SetOutPath $INSTDIR\chat\Preferences
+        Delete /REBOOTOK Nettalk.ini
+        Delete /REBOOTOK script.txt
+        Delete /REBOOTOK Servers.srv
+        Delete /REBOOTOK ShortCut.txt
+           
     ${EndIf}
     
     # Delete shortcuts and the Add/Remove entry.
@@ -418,7 +451,9 @@ Section "Uninstall"
     
     
     # Remove the folders if they're completely empty.
-    RmDir /REBOOTOK $SMPROGRAMS\Skulltag
-    RmDir /REBOOTOK $INSTDIR
+    RmDir /REBOOTOK $SMPROGRAMS\Skulltag   
+    RmDir /REBOOTOK $INSTDIR\chat\Preferences
+    RmDir /REBOOTOK $INSTDIR\chat    
+    RmDir /REBOOTOK $INSTDIR    
 SectionEnd
 
