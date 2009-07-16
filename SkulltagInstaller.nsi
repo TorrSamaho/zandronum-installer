@@ -8,7 +8,7 @@
 #=================================================
 
 # Build options
-!define RELEASEBUILD        # Always define this when doing a final build.
+!define RELEASEBUILD        # Comment out this line while testing to speed things up.
 !define VERSION_NUM 97
 !define VERSION 97d3
 
@@ -46,8 +46,11 @@ Name Skulltag
     ; The grayed text at the bottom.
     BrandingText " "
 
-    !define MUI_FINISHPAGE_NOAUTOCLOSE
-    !define MUI_UNFINISHPAGE_NOAUTOCLOSE
+    ; While debugging, pause to show the install log.
+    !ifndef RELEASEBUILD
+      !define MUI_FINISHPAGE_NOAUTOCLOSE
+      !define MUI_UNFINISHPAGE_NOAUTOCLOSE
+    !endif
 
 # Insert the installer pages
 ;Page custom nsUninstaller_create nsUninstaller_exit
