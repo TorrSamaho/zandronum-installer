@@ -419,24 +419,16 @@ Section "Uninstall"
         Delete /REBOOTOK Nettalk.ini
         Delete /REBOOTOK script.txt
         Delete /REBOOTOK Servers.srv
-        Delete /REBOOTOK ShortCut.txt
-           
+        Delete /REBOOTOK ShortCut.txt          
     ${EndIf}
     
     # Delete shortcuts and the Add/Remove entry.
     ${If} $shouldRemoveShortcuts == 1
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Singleplayer.lnk"
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Play Online.lnk"
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Forum.url"        
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Manage server.lnk"
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Report a bug.url"
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Request a feature.url"
-        Delete /REBOOTOK "$SMPROGRAMS\Skulltag\Tools\Uninstall.lnk"
-      
-        RmDir "$SMPROGRAMS\Skulltag\Tools"
-        RmDir "$SMPROGRAMS\Skulltag"
+        Delete /REBOOTOK "$DESKTOP\Skulltag.lnk"            
+        
         DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     ${EndIf}
+    RmDir /r "$SMPROGRAMS\Skulltag\"
     
     # Remove .WAD/.PK3 associations.
     ${If} $shouldRemoveAssociations == 1
@@ -451,9 +443,7 @@ Section "Uninstall"
     
     
     # Remove the folders if they're completely empty.
-    RmDir /REBOOTOK $SMPROGRAMS\Skulltag   
-    RmDir /REBOOTOK $INSTDIR\chat\Preferences
-    RmDir /REBOOTOK $INSTDIR\chat    
-    RmDir /REBOOTOK $INSTDIR    
+    RmDir /REBOOTOK $SMPROGRAMS\Skulltag     
+    RmDir /r /REBOOTOK $INSTDIR    
 SectionEnd
 
