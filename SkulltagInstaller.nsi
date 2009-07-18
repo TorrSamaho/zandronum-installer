@@ -83,8 +83,7 @@ InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
 # Variables
-Var shouldCreateShortcuts
-Var shouldAssociate
+Var portableInstallation
 Var shouldRemoveShortcuts
 Var shouldRemoveAllFiles
 Var shouldRemoveAssociations
@@ -92,8 +91,7 @@ Var shouldRemoveAssociations
 # Form elements
 Var textbox_Path
 Var button_Browse
-Var check_Shortcuts
-Var check_Associate
+Var check_PortableInstall
 Var check_RemoveShortcuts
 Var check_RemoveAllFiles
 Var check_RemoveAssociations
@@ -191,20 +189,26 @@ Function nsAllInOne_create
             nsDialogs::OnClick /NOUNLOAD $button_Browse $0
             
     # Create the check boxes for extra settings.
-    ${NSD_CreateCheckbox} 144u 168u 86u 10u "Associate PWAD files"
-        Pop $check_Associate
-        SetCtlColors $check_Associate "" "${MUI_BGCOLOR}"
-    ${NSD_CreateCheckbox} -90u 168u 82u 10u "Create shortcuts"
-        Pop $check_Shortcuts
-        SetCtlColors $check_Shortcuts "" "${MUI_BGCOLOR}"
-    ${NSD_SETCHECK} $check_Shortcuts 1
-    ${NSD_SETCHECK} $check_Associate 1       
-
-    
+    ${NSD_CreateCheckbox} 144u 168u 86u 10u "Portable installation"
+        Pop $check_PortableInstall
+        SetCtlColors $check_PortableInstall "" "${MUI_BGCOLOR}"
+        ${NSD_OnClick} $check_PortableInstall nsAllInOne_checkPortable
+		${NSD_SETCHECK} $check_PortableInstall 0    
     nsDialogs::Show
     
     # Delete the image from memory.
     System::Call gdi32::DeleteObject(i$mui.WelcomePage.Image.Bitmap)   
+FunctionEnd
+
+Function nsAllInOne_checkPortable		
+	${NSD_GetState} $check_PortableInstall $portableInstallation    
+	
+	GetDlgItem $0 $HWNDPARENT 1 ; Next button
+    ${If} $portableInstallation == 1
+		${NSD_SetText} $0 "Extract"
+	${Else}
+		${NSD_SetText} $0 "Install"
+	${EndIf}
 FunctionEnd
 
 Function OfflineFileBrowseButton
@@ -219,9 +223,7 @@ FunctionEnd
 
 Function nsAllInOne_exit
     ${NSD_GetText} $textbox_Path $INSTDIR
-    ${NSD_GetState} $check_Shortcuts $shouldCreateShortcuts
-    ${NSD_GetState} $check_Associate $shouldAssociate
-    
+    ${NSD_GetState} $check_PortableInstall $portableInstallation    
 FunctionEnd
 
 # Nicely adds a firewall exception.
@@ -326,10 +328,12 @@ Section "Installer"
     !endif    
 
     # Create the uninstaller.
-    WriteUninstaller $INSTDIR\uninstall.exe
+    ${If} $portableInstallation == 0    
+		WriteUninstaller $INSTDIR\uninstall.exe
+    ${EndIf}
     
     # Create start menu shortcuts.
-    ${If} $shouldCreateShortcuts == 1
+    ${If} $portableInstallation == 0
         SetOutPath $SMPROGRAMS\Skulltag
         CreateShortcut "Play Singleplayer.lnk" $INSTDIR\skulltag.exe
         CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe        
@@ -358,17 +362,19 @@ Section "Installer"
     ${EndIf}
     
     # Associate .WAD and .PK3 files.
-    ${If} $shouldAssociate == 1
+    ${If} $portableInstallation == 0
         DetailPrint "Associating .WAD and .PK3 files..."
         !insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
         !insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
     ${EndIf}
     
     # Create exceptions in Windows Firewall. (All Networks - All IP Version - Enabled)
-    DetailPrint "Creating exceptions in Windows Firewall..."    
-    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"       "Skulltag"
-    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"          "IdeSE"
-    !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
+    ${If} $portableInstallation == 0
+		DetailPrint "Creating exceptions in Windows Firewall..."    
+		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"       "Skulltag"
+		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"          "IdeSE"
+		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
+    ${EndIf}
     
 SectionEnd
 
