@@ -10,7 +10,7 @@
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
 !define VERSION_NUM 97
-!define VERSION 97d4 			# 97d3, 97d42, etc
+!define VERSION 97dSET_VERSION 			# 97d3, 97d42, etc
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -347,13 +347,13 @@ Section "Installer"
     # Create start menu shortcuts.
     ${If} $portableInstallation == 0
         SetOutPath $SMPROGRAMS\Skulltag
-        CreateShortcut "Skulltag: Play Singleplayer.lnk" $INSTDIR\skulltag.exe
-        CreateShortcut "Skulltag: Play Online.lnk" $INSTDIR\doomseeker.exe        
+        CreateShortcut "Play Skulltag Singleplayer.lnk" $INSTDIR\skulltag.exe
+        CreateShortcut "Play Skulltag Online.lnk" $INSTDIR\doomseeker.exe        
         CreateShortcut "Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
         
         # Desktop shortcut.
-        CreateShortcut "$DESKTOP\Skulltag: Play Online.lnk" $INSTDIR\doomseeker.exe
+        CreateShortcut "$DESKTOP\Play Skulltag Online.lnk" $INSTDIR\doomseeker.exe
         
         CreateDirectory $SMPROGRAMS\Skulltag\Tools
         SetOutPath $SMPROGRAMS\Skulltag\Tools        
