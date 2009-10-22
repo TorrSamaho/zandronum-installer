@@ -10,7 +10,7 @@
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
 !define VERSION_NUM 97
-!define VERSION 97d1SET_VERSION 			# 97d3, 97d42, etc
+!define VERSION 97d4 			# 97d3, 97d42, etc
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -45,6 +45,8 @@ Name Skulltag
     
     ; The grayed text at the bottom.
     BrandingText " "
+    
+    Caption "Skulltag ${VERSION} Setup"
 
     ; While debugging, pause to show the install log.
     !ifndef RELEASEBUILD
@@ -309,20 +311,30 @@ Section "Installer"
     
     # Write the game files.
     !ifdef RELEASEBUILD
-        File skulltag_files\fmod.dll
-        File skulltag_files\getwad.dll
-        File skulltag_files\IdeSE.exe
-        File skulltag_files\ip2c.dll
-        File skulltag_files\Readme.txt
-        File skulltag_files\rcon_utility.exe               
+		File skulltag_files\doomseeker.exe
+        File skulltag_files\fmodex.dll        
+        File skulltag_files\libwadseeker.dll
+        File skulltag_files\mingwm10.dll
+		File skulltag_files\QtCore4.dll
+        File skulltag_files\QtGui4.dll
+        File skulltag_files\QtNetwork4.dll        
+        File skulltag_files\Rcon_utility.exe               
+        File skulltag_files\Readme.txt        
         File skulltag_files\skulltag.exe
         File skulltag_files\skulltag.pk3
-        File skulltag_files\skulltag.wad
+        File skulltag_files\skulltag_data.pk3
         File "skulltag_files\Skulltag Version History.txt"
+        File skulltag_files\snes_spc.dll
         
         # Copy the chat directory
-        SetOutPath $INSTDIR\chat
-        File /r skulltag_files\chat\*.*
+        SetOutPath $INSTDIR\skulltalk
+        File /r skulltag_files\skulltalk\*.*
+        SetOutPath $INSTDIR\skins
+        File /r skulltag_files\skins\*.*
+        SetOutPath $INSTDIR\engines
+        File /r skulltag_files\engines\*.*
+        SetOutPath $INSTDIR\announcer
+        File /r skulltag_files\announcer\*.*                       
         
         SetOutPath $INSTDIR
     !endif    
@@ -335,19 +347,19 @@ Section "Installer"
     # Create start menu shortcuts.
     ${If} $portableInstallation == 0
         SetOutPath $SMPROGRAMS\Skulltag
-        CreateShortcut "Play Singleplayer.lnk" $INSTDIR\skulltag.exe
-        CreateShortcut "Play Online.lnk" $INSTDIR\IdeSE.exe        
-        CreateShortcut "Chat with Skulltaggers.lnk" $INSTDIR\chat\Nettalk.exe
+        CreateShortcut "Skulltag: Play Singleplayer.lnk" $INSTDIR\skulltag.exe
+        CreateShortcut "Skulltag: Play Online.lnk" $INSTDIR\doomseeker.exe        
+        CreateShortcut "Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
         
         # Desktop shortcut.
-        CreateShortcut "$DESKTOP\Skulltag.lnk" $INSTDIR\IdeSE.exe
+        CreateShortcut "$DESKTOP\Skulltag: Play Online.lnk" $INSTDIR\doomseeker.exe
         
         CreateDirectory $SMPROGRAMS\Skulltag\Tools
         SetOutPath $SMPROGRAMS\Skulltag\Tools        
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Report a bug" "http://skulltag.com/bugs/"
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Request a feature" "http://skulltag.com/featurerequests/"
-        CreateShortcut "Manage server.lnk" $INSTDIR\rcon_utility.exe           
+        CreateShortcut "Manage server.lnk" $INSTDIR\rcon_utility.exe
         CreateShortcut "Uninstall.lnk" $INSTDIR\uninstall.exe
         
         # Add/Remove programs entry.
@@ -390,42 +402,51 @@ Section "Uninstall"
     ${Else}
         DetailPrint "Removing stock Skulltag files..."
         SetOutPath $INSTDIR
-        Delete /REBOOTOK fmod.dll
-        Delete /REBOOTOK getwad.dll
-        Delete /REBOOTOK IdeSE.exe
-        Delete /REBOOTOK ip2c.dll
-        Delete /REBOOTOK Readme.txt
-        Delete /REBOOTOK rcon_utility.exe
+		Delete /REBOOTOK doomseeker.exe
+        Delete /REBOOTOK fmodex.dll        
+        Delete /REBOOTOK libwadseeker.dll
+        Delete /REBOOTOK mingwm10.dll
+		Delete /REBOOTOK QtCore4.dll
+        Delete /REBOOTOK QtGui4.dll
+        Delete /REBOOTOK QtNetwork4.dll        
+        Delete /REBOOTOK Rcon_utility.exe               
+        Delete /REBOOTOK Readme.txt        
         Delete /REBOOTOK skulltag.exe
-        Delete /REBOOTOK skulltag.pk3    
-        Delete /REBOOTOK skulltag.wad
+        Delete /REBOOTOK skulltag.pk3
+        Delete /REBOOTOK skulltag_data.pk3
         Delete /REBOOTOK "Skulltag Version History.txt"
-        Delete /REBOOTOK uninstall.exe
+        Delete /REBOOTOK snes_spc.dll
+        
+        SetOutPath $INSTDIR\announcer
+        Delete /REBOOTOK Skulltag_98a_announcer.pk3
+        SetOutPath $INSTDIR\engines
+        Delete /REBOOTOK libskulltag.dll
+        SetOutPath $INSTDIR\skins
+        Delete /REBOOTOK ST_BASEII.pk3
+        Delete /REBOOTOK ST_Chaingun_Marine.pk3
+        Delete /REBOOTOK ST_Chubbs.pk3
+        Delete /REBOOTOK ST_Crash.pk3
+        Delete /REBOOTOK ST_Doom64Guy.pk3
+        Delete /REBOOTOK ST_Illucia.pk3
+        Delete /REBOOTOK ST_Orion.pk3
+        Delete /REBOOTOK ST_Phobos.pk3
+        Delete /REBOOTOK ST_Procyon.pk3
+        Delete /REBOOTOK ST_Seenas.pk3
+        Delete /REBOOTOK ST_Strife_Guy.pk3
+        Delete /REBOOTOK ST_Synas.pk3            
         
         # Uninstall chat...
-        SetOutPath $INSTDIR\chat
-        Delete /REBOOTOK Deutsch.lng
-        Delete /REBOOTOK English.lng
+        SetOutPath $INSTDIR\skulltalk
+        Delete /REBOOTOK Skulltalk.exe
+        Delete /REBOOTOK Nettalk.ini        
+        SetOutPath $INSTDIR\skulltalk\Preferences
+        Delete /REBOOTOK BgSkinPicture.dat
+        Delete /REBOOTOK Dark.jpg
         Delete /REBOOTOK Language.ini
-        Delete /REBOOTOK Magyar.lng
-        Delete /REBOOTOK Msg.wav
-        Delete /REBOOTOK Nederlands.lng
-        Delete /REBOOTOK Nettalk.exe
         Delete /REBOOTOK Nettalk.ini
-        Delete /REBOOTOK Nettalkgb.jpg
-        Delete /REBOOTOK PORT.DLL
-        Delete /REBOOTOK Runmode.ini
-        Delete /REBOOTOK Russian.lng
-        Delete /REBOOTOK servers.ini
-        Delete /REBOOTOK ShortCut.txt
-        Delete /REBOOTOK "Simplified Chinese.lng"
-        Delete /REBOOTOK Spanish.lng
-        
-        SetOutPath $INSTDIR\chat\Preferences
-        Delete /REBOOTOK Nettalk.ini
-        Delete /REBOOTOK script.txt
         Delete /REBOOTOK Servers.srv
-        Delete /REBOOTOK ShortCut.txt          
+        Delete /REBOOTOK "Skulltag Dark.skn"
+        Delete /REBOOTOK "Skulltag Light.skn"
     ${EndIf}
     
     # Delete shortcuts and the Add/Remove entry.
@@ -449,7 +470,7 @@ Section "Uninstall"
     
     
     # Remove the folders if they're completely empty.
-    RmDir /REBOOTOK $SMPROGRAMS\Skulltag     
+    RmDir /r /REBOOTOK $SMPROGRAMS\Skulltag     
     RmDir /r /REBOOTOK $INSTDIR    
 SectionEnd
 
