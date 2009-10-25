@@ -459,15 +459,26 @@ Section "Uninstall"
         Delete /REBOOTOK Servers.srv
         Delete /REBOOTOK "Skulltag Dark.skn"
         Delete /REBOOTOK "Skulltag Light.skn"
+        
+        # Delete empty directories.
+        SetOutPath $TEMP
+        RmDir /REBOOTOK $INSTDIR\announcer
+        RmDir /REBOOTOK $INSTDIR\engines
+        RmDir /REBOOTOK $INSTDIR\skins
+        RmDir /REBOOTOK $INSTDIR\skulltalk\Preferences
+        RmDir /REBOOTOK $INSTDIR\skulltalk        
+        
     ${EndIf}
     
     # Delete shortcuts and the Add/Remove entry.
-    ${If} $shouldRemoveShortcuts == 1
-        Delete /REBOOTOK "$DESKTOP\Play Skulltag (Online).lnk"            
-        
+    ${If} $shouldRemoveShortcuts == 1		
+        Delete /REBOOTOK "$DESKTOP\Play Skulltag (Online).lnk"
+        RmDir /r /REBOOTOK "$SMPROGRAMS\Skulltag\"
+        SetShellVarContext all
+        RmDir /r /REBOOTOK "$SMPROGRAMS\Skulltag\"
         DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     ${EndIf}
-    RmDir /r "$SMPROGRAMS\Skulltag\"
+    
     
     # Remove .WAD/.PK3 associations.
     ${If} $shouldRemoveAssociations == 1
@@ -479,10 +490,5 @@ Section "Uninstall"
     !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"        "Skulltag"
     !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\doomseeker.exe"           "Doomseeker"
     !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"    "RCON utiliy"    
-    
-    
-    # Remove the folders if they're completely empty.
-    RmDir /r /REBOOTOK $SMPROGRAMS\Skulltag     
-    RmDir /r /REBOOTOK $INSTDIR    
 SectionEnd
 
