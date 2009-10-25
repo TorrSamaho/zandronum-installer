@@ -463,7 +463,7 @@ Section "Uninstall"
     
     # Delete shortcuts and the Add/Remove entry.
     ${If} $shouldRemoveShortcuts == 1
-        Delete /REBOOTOK "$DESKTOP\Skulltag.lnk"            
+        Delete /REBOOTOK "$DESKTOP\Play Skulltag (Online).lnk"            
         
         DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     ${EndIf}
