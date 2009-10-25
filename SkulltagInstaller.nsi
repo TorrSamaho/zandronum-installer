@@ -347,15 +347,16 @@ Section "Installer"
     
     # Create start menu shortcuts.
     ${If} $portableInstallation == 0
-        SetOutPath $SMPROGRAMS\Skulltag
-        CreateShortcut "Play Skulltag (Singleplayer).lnk" $INSTDIR\skulltag.exe
-        CreateShortcut "Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe        
-        CreateShortcut "Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
-        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
-        
-        # Desktop shortcut.
+        SetOutPath $INSTDIR
+        CreateShortcut "$SMPROGRAMS\Skulltag\Play Skulltag (Singleplayer).lnk" $INSTDIR\skulltag.exe
+        CreateShortcut "$SMPROGRAMS\Skulltag\Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe
         CreateShortcut "$DESKTOP\Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe
+        SetOutPath $INSTDIR\skulltalk
+        CreateShortcut "$SMPROGRAMS\Skulltag\Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
         
+        SetOutPath $SMPROGRAMS\Skulltag
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
+                      
         CreateDirectory $SMPROGRAMS\Skulltag\Tools
         SetOutPath $SMPROGRAMS\Skulltag\Tools        
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Report a bug" "http://skulltag.com/bugs/"
