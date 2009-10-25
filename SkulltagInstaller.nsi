@@ -9,8 +9,8 @@
 
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
-!define VERSION_NUM 97
-!define VERSION 97dSET_VERSION 			# 97d3, 97d42, etc
+!define VERSION_NUM 98
+!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -313,6 +313,7 @@ Section "Installer"
     !ifdef RELEASEBUILD
 		File skulltag_files\doomseeker.exe
         File skulltag_files\fmodex.dll        
+        File skulltag_files\IpToCountry.csv
         File skulltag_files\libwadseeker.dll
         File skulltag_files\mingwm10.dll
 		File skulltag_files\QtCore4.dll
@@ -322,8 +323,8 @@ Section "Installer"
         File skulltag_files\Readme.txt        
         File skulltag_files\skulltag.exe
         File skulltag_files\skulltag.pk3
-        File skulltag_files\skulltag_data.pk3
         File "skulltag_files\Skulltag Version History.txt"
+        File skulltag_files\skulltag_data.pk3        
         File skulltag_files\snes_spc.dll
         
         # Copy the chat directory
@@ -347,13 +348,13 @@ Section "Installer"
     # Create start menu shortcuts.
     ${If} $portableInstallation == 0
         SetOutPath $SMPROGRAMS\Skulltag
-        CreateShortcut "Play Skulltag Singleplayer.lnk" $INSTDIR\skulltag.exe
-        CreateShortcut "Play Skulltag Online.lnk" $INSTDIR\doomseeker.exe        
+        CreateShortcut "Play Skulltag (Singleplayer).lnk" $INSTDIR\skulltag.exe
+        CreateShortcut "Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe        
         CreateShortcut "Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
         
         # Desktop shortcut.
-        CreateShortcut "$DESKTOP\Play Skulltag Online.lnk" $INSTDIR\doomseeker.exe
+        CreateShortcut "$DESKTOP\Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe
         
         CreateDirectory $SMPROGRAMS\Skulltag\Tools
         SetOutPath $SMPROGRAMS\Skulltag\Tools        
@@ -384,7 +385,7 @@ Section "Installer"
     ${If} $portableInstallation == 0
 		DetailPrint "Creating exceptions in Windows Firewall..."    
 		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"       "Skulltag"
-		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"          "IdeSE"
+		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\doomseeker.exe"          "Doomseeker"
 		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
     ${EndIf}
     
@@ -404,6 +405,7 @@ Section "Uninstall"
         SetOutPath $INSTDIR
 		Delete /REBOOTOK doomseeker.exe
         Delete /REBOOTOK fmodex.dll        
+        Delete /REBOOTOK IpToCountry.csv
         Delete /REBOOTOK libwadseeker.dll
         Delete /REBOOTOK mingwm10.dll
 		Delete /REBOOTOK QtCore4.dll
@@ -465,7 +467,7 @@ Section "Uninstall"
     
     # Remove firewall exceptions.
     !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"        "Skulltag"
-    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\IdeSE.exe"           "IdeSE"
+    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\doomseeker.exe"           "Doomseeker"
     !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"    "RCON utiliy"    
     
     
