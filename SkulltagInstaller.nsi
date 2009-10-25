@@ -419,6 +419,15 @@ Section "Uninstall"
         Delete /REBOOTOK "Skulltag Version History.txt"
         Delete /REBOOTOK snes_spc.dll
         
+        # Some old files that might be around from a past upgrade.
+        Delete /REBOOTOK skulltag.wad
+        Delete /REBOOTOK IdeSe.exe
+        Delete /REBOOTOK fmod.dll
+        Delete /REBOOTOK getwad.dll
+        Delete /REBOOTOK ip2c.dll
+        Delete /REBOOTOK devil.dll
+        Delete /REBOOTOK ilu.dll
+        
         SetOutPath $INSTDIR\announcer
         Delete /REBOOTOK Skulltag_98a_announcer.pk3
         SetOutPath $INSTDIR\engines
