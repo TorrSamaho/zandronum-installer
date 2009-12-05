@@ -86,6 +86,7 @@ ShowUninstDetails show
 
 # Variables
 Var portableInstallation
+Var shouldAssociate
 Var shouldRemoveShortcuts
 Var shouldRemoveAllFiles
 Var shouldRemoveAssociations
@@ -94,6 +95,7 @@ Var shouldRemoveAssociations
 Var textbox_Path
 Var button_Browse
 Var check_PortableInstall
+Var check_Associate
 Var check_RemoveShortcuts
 Var check_RemoveAllFiles
 Var check_RemoveAssociations
@@ -195,7 +197,13 @@ Function nsAllInOne_create
         Pop $check_PortableInstall
         SetCtlColors $check_PortableInstall "" "${MUI_BGCOLOR}"
         ${NSD_OnClick} $check_PortableInstall nsAllInOne_checkPortable
-		${NSD_SETCHECK} $check_PortableInstall 0    
+		${NSD_SETCHECK} $check_PortableInstall 0
+    ${NSD_CreateCheckbox} -100u 168u 86u 10u "Associate PWAD files"
+        Pop $check_Associate
+        SetCtlColors $check_Associate "" "${MUI_BGCOLOR}"  
+        ${NSD_OnClick} $check_Associate nsAllInOne_checkPortable
+		${NSD_SETCHECK} $check_Associate 1
+		
     nsDialogs::Show
     
     # Delete the image from memory.
@@ -204,12 +212,15 @@ FunctionEnd
 
 Function nsAllInOne_checkPortable		
 	${NSD_GetState} $check_PortableInstall $portableInstallation    
-	
+
 	GetDlgItem $0 $HWNDPARENT 1 ; Next button
     ${If} $portableInstallation == 1
 		${NSD_SetText} $0 "Extract"
+		${NSD_SETCHECK} $check_Associate 0
+		EnableWindow $check_Associate 0
 	${Else}
 		${NSD_SetText} $0 "Install"
+		EnableWindow $check_Associate 1
 	${EndIf}
 FunctionEnd
 
@@ -226,6 +237,7 @@ FunctionEnd
 Function nsAllInOne_exit
     ${NSD_GetText} $textbox_Path $INSTDIR
     ${NSD_GetState} $check_PortableInstall $portableInstallation    
+    ${NSD_GetState} $check_Associate $shouldAssociate
 FunctionEnd
 
 # Nicely adds a firewall exception.
@@ -377,9 +389,11 @@ Section "Installer"
     
     # Associate .WAD and .PK3 files.
     ${If} $portableInstallation == 0
-        DetailPrint "Associating .WAD and .PK3 files..."
-        !insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
-        !insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
+		${If} $shouldAssociate == 1
+			DetailPrint "Associating .WAD and .PK3 files..."
+			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
+			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
+		${EndIf}
     ${EndIf}
     
     # Create exceptions in Windows Firewall. (All Networks - All IP Version - Enabled)
