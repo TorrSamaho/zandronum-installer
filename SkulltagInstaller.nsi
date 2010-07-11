@@ -1,7 +1,7 @@
 #=================================================
 #
 # Skulltag Installer v3
-# Copyright (c) 2009 Rivecoder
+# Copyright (c) 2010 Rivecoder, Eruanna
 #
 # To add new files to the installer, go to [Section "Installer"] and [Section "Uninstall"].
 #
@@ -10,7 +10,8 @@
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
 !define VERSION_NUM 98
-!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
+#!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
+!define VERSION 98b
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -26,7 +27,7 @@ Name Skulltag
 # Add/Remove Programs entry  
 !define REGKEY "SOFTWARE\$(^Name)"
 !define COMPANY Skulltag
-!define URL http://skulltag.com
+!define URL http://skulltag.net
 
 # Installer graphics settings
     ; Installer EXE icon.
@@ -325,10 +326,12 @@ Section "Installer"
     !ifdef RELEASEBUILD
 		File skulltag_files\doomseeker.exe
         File skulltag_files\fmodex.dll        
+        File skulltag_files\hqnx.dll        
         File skulltag_files\IpToCountry.csv
         File skulltag_files\libwadseeker.dll
+        File skulltag_files\libgcc_s_dw2-1.dll
         File skulltag_files\mingwm10.dll
-		File skulltag_files\QtCore4.dll
+        File skulltag_files\QtCore4.dll
         File skulltag_files\QtGui4.dll
         File skulltag_files\QtNetwork4.dll        
         File skulltag_files\Rcon_utility.exe               
@@ -433,6 +436,8 @@ Section "Uninstall"
         Delete /REBOOTOK skulltag_data.pk3
         Delete /REBOOTOK "Skulltag Version History.txt"
         Delete /REBOOTOK snes_spc.dll
+        Delete /REBOOTOK libgcc_s_dw2-1.dll
+	Delete /REBOOTOK hqnx.dll
         
         # Some old files that might be around from a past upgrade.
         Delete /REBOOTOK skulltag.wad
@@ -449,6 +454,7 @@ Section "Uninstall"
         Delete /REBOOTOK libskulltag.dll
         SetOutPath $INSTDIR\skins
         Delete /REBOOTOK ST_BASEII.pk3
+        Delete /REBOOTOK ST_BASEIII.pk3
         Delete /REBOOTOK ST_Chaingun_Marine.pk3
         Delete /REBOOTOK ST_Chubbs.pk3
         Delete /REBOOTOK ST_Crash.pk3
