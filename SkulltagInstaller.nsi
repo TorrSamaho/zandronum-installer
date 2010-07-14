@@ -11,7 +11,7 @@
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
 !define VERSION_NUM 98
 #!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
-!define VERSION 98b
+!define VERSION 98c
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -333,7 +333,9 @@ Section "Installer"
         File skulltag_files\mingwm10.dll
         File skulltag_files\QtCore4.dll
         File skulltag_files\QtGui4.dll
-        File skulltag_files\QtNetwork4.dll        
+        File skulltag_files\QtNetwork4.dll
+        File skulltag_files\msvcp90.dll
+        File skulltag_files\msvcr90.dll
         File skulltag_files\Rcon_utility.exe               
         File skulltag_files\Readme.txt        
         File skulltag_files\skulltag.exe
@@ -447,6 +449,8 @@ Section "Uninstall"
         Delete /REBOOTOK ip2c.dll
         Delete /REBOOTOK devil.dll
         Delete /REBOOTOK ilu.dll
+        Delete /REBOOTOK msvcp90.dll
+        Delete /REBOOTOK msvcr90.dll
         
         SetOutPath $INSTDIR\announcer
         Delete /REBOOTOK Skulltag_98a_announcer.pk3
