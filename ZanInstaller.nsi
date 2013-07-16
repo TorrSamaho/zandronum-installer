@@ -395,13 +395,13 @@ Section "Uninstall"
         Delete /REBOOTOK skulltag_actors.pk3
         Delete /REBOOTOK "Zandronum Version History.txt"
         Delete /REBOOTOK fmodex.dll
-		# Remove Doomseeker
+	# Remove Doomseeker
         SetOutPath $INSTDIR\Doomseeker
-		Delete /REBOOTOK doomseeker.exe
+	Delete /REBOOTOK doomseeker.exe
         Delete /REBOOTOK doomseeker-portable.bat
         Delete /REBOOTOK libwadseeker.dll
         Delete /REBOOTOK Microsoft.VC90.CRT.manifest
-		Delete /REBOOTOK QtCore4.dll
+	Delete /REBOOTOK QtCore4.dll
         Delete /REBOOTOK QtGui4.dll
         Delete /REBOOTOK QtNetwork4.dll
         Delete /REBOOTOK msvcm90.dll
@@ -429,7 +429,7 @@ Section "Uninstall"
         Delete /REBOOTOK ZanGeneric.pk3
         Delete /REBOOTOK ZanACG.pk3
         # About all of these are largely uncredited.
-		SetOutPath $INSTDIR\skins
+	SetOutPath $INSTDIR\skins
         Delete /REBOOTOK ST_BASEII.pk3
         Delete /REBOOTOK ST_BASEIII.pk3
         Delete /REBOOTOK ST_Chaingun_Marine.pk3
@@ -466,7 +466,7 @@ Section "Uninstall"
         RmDir /REBOOTOK $INSTDIR\skulltalk\Preferences
         RmDir /REBOOTOK $INSTDIR\skulltalk 
         RmDir /REBOOTOK $INSTDIR\Doomseeker\engines		
-		RmDir /REBOOTOK $INSTDIR\Doomseeker
+	RmDir /REBOOTOK $INSTDIR\Doomseeker
         
     ${EndIf}
 
