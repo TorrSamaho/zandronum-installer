@@ -1,7 +1,8 @@
 #=================================================
 #
-# Skulltag Installer v3
+# Zandronum Installer v4
 # Copyright (c) 2010 Rivecoder, Eruanna
+# Copyright (c) 2013 Zandronum development team, Torr Samaho
 #
 # To add new files to the installer, go to [Section "Installer"] and [Section "Uninstall"].
 #
@@ -9,9 +10,9 @@
 
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
-!define VERSION_NUM 98
+!define VERSION_NUM 1.1
 #!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
-!define VERSION 98c
+!define VERSION 1.1
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -22,12 +23,12 @@
 !include MUI2.nsh
 !include include\fileAssociate.nsh
 
-Name Skulltag
+Name Zandronum
 
 # Add/Remove Programs entry  
 !define REGKEY "SOFTWARE\$(^Name)"
-!define COMPANY Skulltag
-!define URL http://skulltag.net
+!define COMPANY Zandronum
+!define URL http://zandronum.com
 
 # Installer graphics settings
     ; Installer EXE icon.
@@ -47,7 +48,7 @@ Name Skulltag
     ; The grayed text at the bottom.
     BrandingText " "
     
-    Caption "Skulltag ${VERSION} Setup"
+    Caption "Zandronum ${VERSION} Setup"
 
     ; While debugging, pause to show the install log.
     !ifndef RELEASEBUILD
@@ -70,12 +71,12 @@ UnInstPage custom un.nsUninstaller_create un.nsUninstaller_exit
 
 # EXE attributes
 VIProductVersion ${VERSION_NUM}.0.0.1
-OutFile skulltag${VERSION}.exe
-InstallDir $PROGRAMFILES\Skulltag
+OutFile zandronum${VERSION}.exe
+InstallDir $PROGRAMFILES\Zandronum
 CRCCheck on
 XPStyle on
 ShowInstDetails show
-VIAddVersionKey ProductName Skulltag
+VIAddVersionKey ProductName Zandronum
 VIAddVersionKey ProductVersion "${VERSION}"
 VIAddVersionKey CompanyName "${COMPANY}"
 VIAddVersionKey CompanyWebsite "${URL}"
@@ -91,6 +92,7 @@ Var shouldAssociate
 Var shouldRemoveShortcuts
 Var shouldRemoveAllFiles
 Var shouldRemoveAssociations
+Var shouldRemoveDSConfig
 
 # Form elements
 Var textbox_Path
@@ -100,6 +102,7 @@ Var check_Associate
 Var check_RemoveShortcuts
 Var check_RemoveAllFiles
 Var check_RemoveAssociations
+Var check_RemoveConfig
 !define NSD_SETCHECK `!insertmacro _NSD_SETCHECK`
 !macro _NSD_SETCHECK NAME TOGGLE
     ${If} ${TOGGLE} == 1
@@ -121,8 +124,8 @@ Function un.nsUninstaller_create
     nsDialogs::SetRTL /NOUNLOAD $(^RTL)
     
     # Create the "Welcome!" labels.
-    ${NSD_CreateLabel} 8u 0u 100% 10u "This will uninstall Skulltag."
-    ${NSD_CreateGroupBox} 8u 20u 95% 76u "Uninstall from"    
+    ${NSD_CreateLabel} 8u 0u 100% 10u "This will uninstall Zandronum."
+    ${NSD_CreateGroupBox} 8u 20u 95% 90u "Uninstall from"    
     
     ${NSD_CreateText} 16u 34u 90% 12u $INSTDIR
         Pop $0
@@ -131,11 +134,14 @@ Function un.nsUninstaller_create
         Pop $check_RemoveShortcuts
     ${NSD_CreateCheckbox} 24u 66u -28u 10u "Remove PWAD associations"
         Pop $check_RemoveAssociations
-    ${NSD_CreateCheckbox} 24u 78u -28u 10u "Remove all files in the Skulltag folder"
+    ${NSD_CreateCheckbox} 24u 78u -28u 10u "Remove static Doomseeker configuration"
+        Pop $check_RemoveConfig
+    ${NSD_CreateCheckbox} 24u 90u -28u 10u "Remove all files in the Zandronum folder"
         Pop $check_RemoveAllFiles
     ${NSD_SETCHECK} $check_RemoveShortcuts 1
     ${NSD_SETCHECK} $check_RemoveAssociations 1    
     ${NSD_SETCHECK} $check_RemoveAllFiles 0
+	${NSD_SETCHECK} $check_RemoveConfig 0
     
     nsDialogs::Show
 FunctionEnd
@@ -144,6 +150,7 @@ Function un.nsUninstaller_exit
     ${NSD_GetState} $check_RemoveShortcuts $shouldRemoveShortcuts
     ${NSD_GetState} $check_RemoveAllFiles $shouldRemoveAllFiles
     ${NSD_GetState} $check_RemoveAssociations $shouldRemoveAssociations
+    ${NSD_GetState} $check_RemoveConfig $shouldRemoveDSConfig
 FunctionEnd
 
 Var mui.WelcomePage.Image
@@ -171,12 +178,12 @@ Function nsAllInOne_create
     SendMessage $mui.WelcomePage.Image ${STM_SETIMAGE} ${IMAGE_BITMAP} $mui.WelcomePage.Image.Bitmap
     
     # Create the "Welcome!" labels.
-    ${NSD_CreateLabel} 140u 30u -140u 12u "Welcome to Skulltag setup!"
+    ${NSD_CreateLabel} 140u 30u -140u 12u "Welcome to Zandronum setup!"
         Pop $0
         SetCtlColors $0 "" "${MUI_BGCOLOR}"
         CreateFont $mui.WelcomePage.Title.Font "Tahoma" "8" "700"
         SendMessage $0 ${WM_SETFONT} $mui.WelcomePage.Title.Font 0
-    ${NSD_CreateLabel} 140u 42u -140u 10u "Skulltag adds fresh ideas to Doom's classic gameplay."
+    ${NSD_CreateLabel} 140u 42u -140u 10u "Zandronum continues where Skulltag left off." # [JZ] i'm so original.
         Pop $0
         SetCtlColors $0 "" "${MUI_BGCOLOR}"
     
@@ -241,70 +248,6 @@ Function nsAllInOne_exit
     ${NSD_GetState} $check_Associate $shouldAssociate
 FunctionEnd
 
-# Nicely adds a firewall exception.
-!macro ADD_FIREWALL_EXCEPTION PATH NAME
-
-    # Check if windows firewall service is running.
-    SimpleFC::IsFirewallServiceRunning
-        Pop $0 ; return error(1)/success(0)
-        Pop $1 ; return 1=IsRunning/0=Not Running
-    ${If} $0 == 1
-    ${OrIf} $1 == 0
-        DetailPrint "${NAME}: firewall not running."
-    ${Else}   
-        SimpleFC::IsApplicationAdded ${PATH}
-            Pop $0 ; return error(1)/success(0)
-            Pop $1 ; return 1=Added/0=Not added
-            
-        ${If} $0 == 1       # Error check
-            DetailPrint "${NAME}: Couldn't connect to firewall."
-        ${Else}        
-            ${If} $1 == 1       # Not added already?
-                DetailPrint "${NAME}: An exception already exists."
-            ${Else}            
-                SimpleFC::AddApplication ${NAME} ${PATH} 0 2 "" 1
-                    Pop $0  ; return error(1)/success(0)
-                ${If} $0 == 0
-                    DetailPrint "${NAME}: Added exception."
-                ${Else}
-                    DetailPrint "${NAME}: Couldn't add an exception."
-                ${EndIf}
-            ${EndIf}
-        ${EndIf}
-    ${EndIf}
-!macroend
-
-# Nicely removes a firewall exception.
-!macro REMOVE_FIREWALL_EXCEPTION PATH NAME
-
-    # Check if windows firewall service is running.
-    SimpleFC::IsFirewallServiceRunning
-        Pop $0 ; return error(1)/success(0)
-        Pop $1 ; return 1=IsRunning/0=Not Running
-    ${If} $0 == 1
-    ${OrIf} $1 == 0
-        DetailPrint "${NAME}: firewall not running."
-    ${Else}   
-        SimpleFC::IsApplicationAdded ${PATH}
-            Pop $0 ; return error(1)/success(0)
-            Pop $1 ; return 1=Added/0=Not added
-            
-        ${If} $0 == 1       # Error check
-            DetailPrint "${NAME}: Couldn't connect to firewall."
-        ${Else}        
-            ${If} $1 == 1       # Added already?           
-                SimpleFC::RemoveApplication ${PATH}
-                    Pop $0  ; return error(1)/success(0)
-                ${If} $0 == 0
-                    DetailPrint "${NAME}: Removed exception."
-                ${Else}
-                    DetailPrint "${NAME}: Couldn't remove exception."
-                ${EndIf}
-            ${EndIf}
-        ${EndIf}
-    ${EndIf}
-!macroend
-
 #===================================================
 #
 # Creates internet shortcuts.
@@ -324,35 +267,53 @@ Section "Installer"
     
     # Write the game files.
     !ifdef RELEASEBUILD
-		File skulltag_files\doomseeker.exe
-        File skulltag_files\fmodex.dll        
-        File skulltag_files\hqnx.dll        
-        File skulltag_files\IpToCountry.csv
-        File skulltag_files\libwadseeker.dll
-        File skulltag_files\libgcc_s_dw2-1.dll
-        File skulltag_files\mingwm10.dll
-        File skulltag_files\QtCore4.dll
-        File skulltag_files\QtGui4.dll
-        File skulltag_files\QtNetwork4.dll
-        File skulltag_files\msvcp90.dll
-        File skulltag_files\msvcr90.dll
-        File skulltag_files\Rcon_utility.exe               
-        File skulltag_files\Readme.txt        
-        File skulltag_files\skulltag.exe
-        File skulltag_files\skulltag.pk3
-        File "skulltag_files\Skulltag Version History.txt"
-        File skulltag_files\skulltag_data.pk3        
-        File skulltag_files\snes_spc.dll
-        
-        # Copy the chat directory
-        SetOutPath $INSTDIR\skulltalk
-        File /r skulltag_files\skulltalk\*.*
+        # File zandronum_files\Rcon_utility.exe  [NW] Doomseeker supports this already. We no longer need to maintain this utility.
+        File zandronum_files\Readme.txt
+        File zandronum_files\zandronum.exe
+        File zandronum_files\zandronum.pk3
+        File "zandronum_files\Zandronum Version History.txt"
+        File zandronum_files\fmodex.dll
+        File zandronum_files\skulltag_actors.pk3
+	# Doomseeker files.
+        SetOutPath $INSTDIR\Doomseeker
+        File zandronum_files\Doomseeker\doomseeker.exe
+        File zandronum_files\Doomseeker\doomseeker.ico
+        File zandronum_files\Doomseeker\doomseeker-portable.bat
+        File zandronum_files\Doomseeker\libwadseeker.dll
+        File zandronum_files\Doomseeker\Microsoft.VC90.CRT.manifest
+        File zandronum_files\Doomseeker\msvcm90.dll
+        File zandronum_files\Doomseeker\msvcp90.dll
+        File zandronum_files\Doomseeker\msvcr90.dll
+        File zandronum_files\Doomseeker\QtCore4.dll
+        File zandronum_files\Doomseeker\QtGui4.dll
+        File zandronum_files\Doomseeker\QtNetwork4.dll
+        File zandronum_files\Doomseeker\QtXml4.dll
+        File zandronum_files\Doomseeker\updater.exe
+        # Preconfigure paths for Doomseeker. [NW] todo: figure out how to break up and read line 364, 366, 361, 362
+        #SetOutPath $APPDATA\.doomseeker
+        #FileOpen $9 doomseeker.ini w 
+        #FileWrite $9 "[Zandronum]$\r$\n"
+        #FileWrite $9 "Masterserver=master.zandronum.com:15300$\r$\n"
+        #FileWrite $9 "BinaryPath=$\"$INSTDIR\zandronum.exe$\"$\r$\n"
+        #FileWrite $9 "ServerBinaryPath=$INSTDIR\zandronum.exe$\r$\n"
+        #FileWrite $9 "[Doomseeker]$\r$\n"
+        #FileWrite $9 "WadPaths=$\"$INSTDIR\\wads\\;$INSTDIR\\$\"$\r$\n"
+        #FileWrite $9 "[Wadseeker]$\r$\n"
+        #FileWrite $9 "TargetDirectory=$INSTDIR\wads"
+        #FileClose $9
+        # Copy the chat directory [NW] Doomseeker supports this too.
+        # SetOutPath $INSTDIR\skulltalk
+        # File /r skulltag_files\skulltalk\*.*
+		
         SetOutPath $INSTDIR\skins
-        File /r skulltag_files\skins\*.*
-        SetOutPath $INSTDIR\engines
-        File /r skulltag_files\engines\*.*
+        File /r zandronum_files\skins\*.*
+        SetOutPath $INSTDIR\Doomseeker\engines
+        File /r zandronum_files\Doomseeker\engines\*.*
+        # [CK] Support new Doomseeker folder
+        SetOutPath $INSTDIR\Doomseeker\translations
+        File /r zandronum_files\Doomseeker\translations\*.*
         SetOutPath $INSTDIR\announcer
-        File /r skulltag_files\announcer\*.*                       
+        File /r zandronum_files\announcer\*.*                       
         
         SetOutPath $INSTDIR
     !endif    
@@ -365,20 +326,23 @@ Section "Installer"
     # Create start menu shortcuts.
     ${If} $portableInstallation == 0
         SetOutPath $INSTDIR
-        CreateShortcut "$SMPROGRAMS\Skulltag\Play Skulltag (Singleplayer).lnk" $INSTDIR\skulltag.exe
-        CreateShortcut "$SMPROGRAMS\Skulltag\Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe
-        CreateShortcut "$DESKTOP\Play Skulltag (Online).lnk" $INSTDIR\doomseeker.exe
-        SetOutPath $INSTDIR\skulltalk
-        CreateShortcut "$SMPROGRAMS\Skulltag\Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
+		# Start menu stuff
+        CreateShortcut "$SMPROGRAMS\Zandronum\Play Zandronum (Singleplayer).lnk" $INSTDIR\zandronum.exe
+        CreateShortcut "$SMPROGRAMS\Zandronum\Play Zandronum (Online).lnk" $INSTDIR\Doomseeker\doomseeker.exe
+        CreateShortcut "$DESKTOP\Play Zandronum (Online).lnk" $INSTDIR\Doomseeker\doomseeker.exe
+        #SetOutPath $INSTDIR\skulltalk
+        #CreateShortcut "$SMPROGRAMS\Skulltag\Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
         
-        SetOutPath $SMPROGRAMS\Skulltag
-        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Forum" "http://skulltag.com/forum/"
+        SetOutPath $SMPROGRAMS\Zandronum
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Forum" "http://zandronum.com/forum/"
                       
-        CreateDirectory $SMPROGRAMS\Skulltag\Tools
-        SetOutPath $SMPROGRAMS\Skulltag\Tools        
-        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Report a bug" "http://skulltag.com/bugs/"
-        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Skulltag\Tools\Request a feature" "http://skulltag.com/featurerequests/"
-        CreateShortcut "Manage server.lnk" $INSTDIR\rcon_utility.exe
+        CreateDirectory $SMPROGRAMS\Zandronum\Tools
+        SetOutPath $SMPROGRAMS\Zandronum\Tools        
+		# [NW] Merge these two into a single tracker link instead of splitting them up. They go to the same place anyway. I may create splash pages later and change out this code to reflect it.
+        #!insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Report a bug" "http://skulltag.com/bugs/"
+        #!insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Request a feature" "http://skulltag.com/featurerequests/"
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Development Tracker" "http://zandronum.com/tracker"
+        #CreateShortcut "Manage server.lnk" $INSTDIR\rcon_utility.exe
         CreateShortcut "Uninstall.lnk" $INSTDIR\uninstall.exe
         
         # Add/Remove programs entry.
@@ -396,17 +360,17 @@ Section "Installer"
     ${If} $portableInstallation == 0
 		${If} $shouldAssociate == 1
 			DetailPrint "Associating .WAD and .PK3 files..."
-			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
-			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file "$INSTDIR\skulltag.exe,0" "Play with Skulltag" "$INSTDIR\skulltag.exe $\"%1$\""
+			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
+			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
 		${EndIf}
     ${EndIf}
     
     # Create exceptions in Windows Firewall. (All Networks - All IP Version - Enabled)
     ${If} $portableInstallation == 0
 		DetailPrint "Creating exceptions in Windows Firewall..."    
-		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"       "Skulltag"
-		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\doomseeker.exe"          "Doomseeker"
-		!insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
+		# !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\zandronum.exe" "Zandronum"
+		# !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\Doomseeker\doomseeker.exe" "Doomseeker"
+#		# !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
     ${EndIf}
     
 SectionEnd
@@ -421,25 +385,32 @@ Section "Uninstall"
         DetailPrint "Removing all files in $INSTDIR..."
         RmDir /r /REBOOTOK $INSTDIR
     ${Else}
-        DetailPrint "Removing stock Skulltag files..."
+        DetailPrint "Removing stock Zandronum files..."
+        # zan
         SetOutPath $INSTDIR
+        Delete /REBOOTOK Readme.txt
+        Delete /REBOOTOK fmodex.dll    		
+        Delete /REBOOTOK zandronum.exe
+        Delete /REBOOTOK zandronum.pk3
+        Delete /REBOOTOK skulltag_actors.pk3
+        Delete /REBOOTOK "Zandronum Version History.txt"
+        Delete /REBOOTOK fmodex.dll
+		# Remove Doomseeker
+        SetOutPath $INSTDIR\Doomseeker
 		Delete /REBOOTOK doomseeker.exe
-        Delete /REBOOTOK fmodex.dll        
-        Delete /REBOOTOK IpToCountry.csv
+        Delete /REBOOTOK doomseeker-portable.bat
         Delete /REBOOTOK libwadseeker.dll
-        Delete /REBOOTOK mingwm10.dll
+        Delete /REBOOTOK Microsoft.VC90.CRT.manifest
 		Delete /REBOOTOK QtCore4.dll
         Delete /REBOOTOK QtGui4.dll
-        Delete /REBOOTOK QtNetwork4.dll        
-        Delete /REBOOTOK Rcon_utility.exe               
-        Delete /REBOOTOK Readme.txt        
-        Delete /REBOOTOK skulltag.exe
-        Delete /REBOOTOK skulltag.pk3
-        Delete /REBOOTOK skulltag_data.pk3
-        Delete /REBOOTOK "Skulltag Version History.txt"
-        Delete /REBOOTOK snes_spc.dll
-        Delete /REBOOTOK libgcc_s_dw2-1.dll
-	Delete /REBOOTOK hqnx.dll
+        Delete /REBOOTOK QtNetwork4.dll
+        Delete /REBOOTOK msvcm90.dll
+        Delete /REBOOTOK msvcp90.dll
+        Delete /REBOOTOK msvcr90.dll
+        SetOutPath $INSTDIR\Doomseeker\engines
+        Delete /REBOOTOK libzandronum.dll
+        Delete /REBOOTOK Microsoft.VC90.CRT.manifest
+
         
         # Some old files that might be around from a past upgrade.
         Delete /REBOOTOK skulltag.wad
@@ -449,14 +420,16 @@ Section "Uninstall"
         Delete /REBOOTOK ip2c.dll
         Delete /REBOOTOK devil.dll
         Delete /REBOOTOK ilu.dll
-        Delete /REBOOTOK msvcp90.dll
-        Delete /REBOOTOK msvcr90.dll
+        Delete /REBOOTOK skulltag_data.pk3
+        Delete /REBOOTOK Rcon_utility.exe
+
         
         SetOutPath $INSTDIR\announcer
         Delete /REBOOTOK Skulltag_98a_announcer.pk3
-        SetOutPath $INSTDIR\engines
-        Delete /REBOOTOK libskulltag.dll
-        SetOutPath $INSTDIR\skins
+        Delete /REBOOTOK ZanGeneric.pk3
+        Delete /REBOOTOK ZanACG.pk3
+        # About all of these are largely uncredited.
+		SetOutPath $INSTDIR\skins
         Delete /REBOOTOK ST_BASEII.pk3
         Delete /REBOOTOK ST_BASEIII.pk3
         Delete /REBOOTOK ST_Chaingun_Marine.pk3
@@ -470,6 +443,7 @@ Section "Uninstall"
         Delete /REBOOTOK ST_Seenas.pk3
         Delete /REBOOTOK ST_Strife_Guy.pk3
         Delete /REBOOTOK ST_Synas.pk3            
+        Delete /REBOOTOK about.txt
         
         # Uninstall chat...
         SetOutPath $INSTDIR\skulltalk
@@ -490,16 +464,35 @@ Section "Uninstall"
         RmDir /REBOOTOK $INSTDIR\engines
         RmDir /REBOOTOK $INSTDIR\skins
         RmDir /REBOOTOK $INSTDIR\skulltalk\Preferences
-        RmDir /REBOOTOK $INSTDIR\skulltalk        
+        RmDir /REBOOTOK $INSTDIR\skulltalk 
+        RmDir /REBOOTOK $INSTDIR\Doomseeker\engines		
+		RmDir /REBOOTOK $INSTDIR\Doomseeker
         
     ${EndIf}
-    
+
+	# Remove the static configuration inside of AppData.
+    ${If} $shouldRemoveDSConfig == 1
+        Delete /REBOOTOK $APPDATA\.doomseeker\demos\*.*
+        RmDir /r /REBOOTOK $APPDATA\.doomseeker\demos
+        Delete /REBOOTOK doomseeker.ini
+        Delete /REBOOTOK doomseeker-irc.ini
+        Delete /REBOOTOK IpToCountry.csv
+        Delete /REBOOTOK Odamex
+        Delete /REBOOTOK Skulltag
+        Delete /REBOOTOK Vavoom
+        Delete /REBOOTOK Zandronum
+        Delete /REBOOTOK ZDaemon
+        Delete /REBOOTOK ChocolateDoom
+        Delete /REBOOTOK $APPDATA\.doomseeker\*.*
+        RmDir /r /REBOOTOK $APPDATA\.doomseeker
+    ${EndIf}
+
     # Delete shortcuts and the Add/Remove entry.
     ${If} $shouldRemoveShortcuts == 1		
-        Delete /REBOOTOK "$DESKTOP\Play Skulltag (Online).lnk"
-        RmDir /r /REBOOTOK "$SMPROGRAMS\Skulltag\"
+        Delete /REBOOTOK "$DESKTOP\Play Zandronum (Online).lnk"
+        RmDir /r /REBOOTOK "$SMPROGRAMS\Zandronum\"
         SetShellVarContext all
-        RmDir /r /REBOOTOK "$SMPROGRAMS\Skulltag\"
+        RmDir /r /REBOOTOK "$SMPROGRAMS\Zandronum\"
         DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     ${EndIf}
     
@@ -509,10 +502,10 @@ Section "Uninstall"
         !insertmacro APP_UNASSOCIATE "wad" "Doom.wadfile"
         !insertmacro APP_UNASSOCIATE "pk3" "ZDoom.wadfile"
     ${EndIf}
-    
+	
     # Remove firewall exceptions.
-    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\skulltag.exe"        "Skulltag"
-    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\doomseeker.exe"           "Doomseeker"
-    !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"    "RCON utiliy"    
+    # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\zandronum.exe" "Zandronum"
+    # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\Doomseeker\doomseeker.exe" "Doomseeker"
+    # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe" "RCON utiliy"    
 SectionEnd
 
