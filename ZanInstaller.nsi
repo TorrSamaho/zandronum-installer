@@ -360,8 +360,8 @@ Section "Installer"
     ${If} $portableInstallation == 0
 		${If} $shouldAssociate == 1
 			DetailPrint "Associating .WAD and .PK3 files..."
-			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
-			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
+			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file" "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
+			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file" "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
 		${EndIf}
     ${EndIf}
     
@@ -398,19 +398,25 @@ Section "Uninstall"
 	# Remove Doomseeker
         SetOutPath $INSTDIR\Doomseeker
 	Delete /REBOOTOK doomseeker.exe
+	Delete /REBOOTOK doomseeker.ico
         Delete /REBOOTOK doomseeker-portable.bat
         Delete /REBOOTOK libwadseeker.dll
         Delete /REBOOTOK Microsoft.VC90.CRT.manifest
 	Delete /REBOOTOK QtCore4.dll
         Delete /REBOOTOK QtGui4.dll
         Delete /REBOOTOK QtNetwork4.dll
+	Delete /REBOOTOK QtXml4.dll
         Delete /REBOOTOK msvcm90.dll
         Delete /REBOOTOK msvcp90.dll
         Delete /REBOOTOK msvcr90.dll
+	Delete /REBOOTOK updater.exe
         SetOutPath $INSTDIR\Doomseeker\engines
         Delete /REBOOTOK libzandronum.dll
         Delete /REBOOTOK Microsoft.VC90.CRT.manifest
-
+        SetOutPath $INSTDIR\Doomseeker\translations
+        Delete /REBOOTOK pl_PL.qm
+        Delete /REBOOTOK qt_pl.qm
+        Delete /REBOOTOK translations.def
         
         # Some old files that might be around from a past upgrade.
         Delete /REBOOTOK skulltag.wad
@@ -458,6 +464,9 @@ Section "Uninstall"
         Delete /REBOOTOK "Skulltag Dark.skn"
         Delete /REBOOTOK "Skulltag Light.skn"
         
+	# Delete uninstaller [doesn't work, figured I had to try]
+        # Delete /REBOOTOK uninstall.exe
+
         # Delete empty directories.
         SetOutPath $TEMP
         RmDir /REBOOTOK $INSTDIR\announcer
@@ -465,8 +474,10 @@ Section "Uninstall"
         RmDir /REBOOTOK $INSTDIR\skins
         RmDir /REBOOTOK $INSTDIR\skulltalk\Preferences
         RmDir /REBOOTOK $INSTDIR\skulltalk 
+        RmDir /REBOOTOK $INSTDIR\Doomseeker\translations	
         RmDir /REBOOTOK $INSTDIR\Doomseeker\engines		
 	RmDir /REBOOTOK $INSTDIR\Doomseeker
+	RmDir /REBOOTOK $INSTDIR
         
     ${EndIf}
 
