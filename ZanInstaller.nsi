@@ -386,6 +386,8 @@ Section "Uninstall"
         RmDir /r /REBOOTOK $INSTDIR
     ${Else}
         DetailPrint "Removing stock Zandronum files..."
+	# Apparently uninstaller has to be deleted first...
+	delete $INSTDIR\uninstall.exe
         # zan
         SetOutPath $INSTDIR
         Delete /REBOOTOK Readme.txt
@@ -463,9 +465,6 @@ Section "Uninstall"
         Delete /REBOOTOK Servers.srv
         Delete /REBOOTOK "Skulltag Dark.skn"
         Delete /REBOOTOK "Skulltag Light.skn"
-        
-	# Delete uninstaller [doesn't work, figured I had to try]
-        # Delete /REBOOTOK uninstall.exe
 
         # Delete empty directories.
         SetOutPath $TEMP
