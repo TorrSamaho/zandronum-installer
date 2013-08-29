@@ -1,4 +1,4 @@
->> ZANDRONUM 1.1 <<
+>> ZANDRONUM 1.2 <<
 -------------------
 
 Please see the zandronum_readme.txt for how to compile

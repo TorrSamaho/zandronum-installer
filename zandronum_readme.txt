@@ -2,7 +2,8 @@
  ZANDRONUM INSTALLER 
 =====================
 
-1) To compile the installer, put the following in the zandronum_files directory:
+1) To compile the installer, put the following in the zandronum_files directory,
+If the folder does not exist, create it in the directory:
 
 /fmodex.dll
 /licenses.zip

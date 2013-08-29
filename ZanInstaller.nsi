@@ -10,9 +10,9 @@
 
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
-!define VERSION_NUM 1.1
+!define VERSION_NUM 1.2
 #!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
-!define VERSION 1.1
+!define VERSION 1.2
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
