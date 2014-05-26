@@ -1,0 +1,7 @@
+syntax:glob
+*.exe
+*.nsi
+files/*
+
+syntax: regex
+^files/(?!instructions.txt)

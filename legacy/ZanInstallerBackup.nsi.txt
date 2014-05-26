@@ -2,7 +2,7 @@
 #
 # Zandronum Installer v4
 # Copyright (c) 2010 Rivecoder, Eruanna
-# Copyright (c) 2013 Zandronum development team, Torr Samaho
+# Copyright (c) 2014 Zandronum development team, Torr Samaho
 #
 # To add new files to the installer, go to [Section "Installer"] and [Section "Uninstall"].
 #
@@ -10,9 +10,9 @@
 
 # Build options
 !define RELEASEBUILD        # Comment out this line while testing to speed things up.
-!define VERSION_NUM 1.2
+!define VERSION_NUM 1.2.1
 #!define VERSION 98xSET_VERSION 			# 97d3, 97d42, etc
-!define VERSION 1.2
+!define VERSION 1.2.1
 
 # Compression (lzma = god)
 !ifdef RELEASEBUILD
@@ -280,6 +280,9 @@ Section "Installer"
         File zandronum_files\Doomseeker\doomseeker.ico
         File zandronum_files\Doomseeker\doomseeker-portable.bat
         File zandronum_files\Doomseeker\libwadseeker.dll
+		File zandronum_files\Doomseeker\LICENSE.json.txt
+		File zandronum_files\Doomseeker\LICENSE.txt
+		File zandronum_files\Doomseeker\LICENSE.wadseeker.txt
         File zandronum_files\Doomseeker\Microsoft.VC90.CRT.manifest
         File zandronum_files\Doomseeker\msvcm90.dll
         File zandronum_files\Doomseeker\msvcp90.dll
@@ -388,39 +391,43 @@ Section "Uninstall"
         DetailPrint "Removing stock Zandronum files..."
 	# Apparently uninstaller has to be deleted first...
 	delete $INSTDIR\uninstall.exe
-        # zan
-        SetOutPath $INSTDIR
+    # zan
+    SetOutPath $INSTDIR
         Delete /REBOOTOK Readme.txt
         Delete /REBOOTOK fmodex.dll    		
         Delete /REBOOTOK zandronum.exe
         Delete /REBOOTOK zandronum.pk3
         Delete /REBOOTOK skulltag_actors.pk3
         Delete /REBOOTOK "Zandronum Version History.txt"
-        Delete /REBOOTOK fmodex.dll
+        Delete /REBOOTOK licenses.zip
 	# Remove Doomseeker
-        SetOutPath $INSTDIR\Doomseeker
-	Delete /REBOOTOK doomseeker.exe
-	Delete /REBOOTOK doomseeker.ico
+    SetOutPath $INSTDIR\Doomseeker
+		Delete /REBOOTOK doomseeker.exe
+		Delete /REBOOTOK doomseeker.ico
         Delete /REBOOTOK doomseeker-portable.bat
         Delete /REBOOTOK libwadseeker.dll
+		Delete /REBOOTOK LICENSE.json.txt
+		Delete /REBOOTOK LICENSE.txt
+		Delete /REBOOTOK LICENSE.wadseeker.txt
         Delete /REBOOTOK Microsoft.VC90.CRT.manifest
-	Delete /REBOOTOK QtCore4.dll
+		Delete /REBOOTOK QtCore4.dll
         Delete /REBOOTOK QtGui4.dll
         Delete /REBOOTOK QtNetwork4.dll
-	Delete /REBOOTOK QtXml4.dll
+		Delete /REBOOTOK QtXml4.dll
         Delete /REBOOTOK msvcm90.dll
         Delete /REBOOTOK msvcp90.dll
         Delete /REBOOTOK msvcr90.dll
-	Delete /REBOOTOK updater.exe
-        SetOutPath $INSTDIR\Doomseeker\engines
+		Delete /REBOOTOK updater.exe
+    SetOutPath $INSTDIR\Doomseeker\engines
         Delete /REBOOTOK libzandronum.dll
         Delete /REBOOTOK Microsoft.VC90.CRT.manifest
-        SetOutPath $INSTDIR\Doomseeker\translations
+    SetOutPath $INSTDIR\Doomseeker\translations
         Delete /REBOOTOK pl_PL.qm
         Delete /REBOOTOK qt_pl.qm
         Delete /REBOOTOK translations.def
         
         # Some old files that might be around from a past upgrade.
+	SetOutPath $INSTDIR
         Delete /REBOOTOK skulltag.wad
         Delete /REBOOTOK IdeSe.exe
         Delete /REBOOTOK fmod.dll
@@ -432,11 +439,12 @@ Section "Uninstall"
         Delete /REBOOTOK Rcon_utility.exe
 
         
-        SetOutPath $INSTDIR\announcer
+    SetOutPath $INSTDIR\announcer
         Delete /REBOOTOK Skulltag_98a_announcer.pk3
         Delete /REBOOTOK ZanGeneric.pk3
         Delete /REBOOTOK ZanACG.pk3
-        # About all of these are largely uncredited.
+		
+    # About all of these are largely uncredited.
 	SetOutPath $INSTDIR\skins
         Delete /REBOOTOK ST_BASEII.pk3
         Delete /REBOOTOK ST_BASEIII.pk3
@@ -453,11 +461,11 @@ Section "Uninstall"
         Delete /REBOOTOK ST_Synas.pk3            
         Delete /REBOOTOK about.txt
         
-        # Uninstall chat...
-        SetOutPath $INSTDIR\skulltalk
+    # Uninstall chat...
+    SetOutPath $INSTDIR\skulltalk
         Delete /REBOOTOK Skulltalk.exe
         Delete /REBOOTOK Nettalk.ini        
-        SetOutPath $INSTDIR\skulltalk\Preferences
+    SetOutPath $INSTDIR\skulltalk\Preferences
         Delete /REBOOTOK BgSkinPicture.dat
         Delete /REBOOTOK Dark.jpg
         Delete /REBOOTOK Language.ini
@@ -467,7 +475,7 @@ Section "Uninstall"
         Delete /REBOOTOK "Skulltag Light.skn"
 
         # Delete empty directories.
-        SetOutPath $TEMP
+    SetOutPath $TEMP
         RmDir /REBOOTOK $INSTDIR\announcer
         RmDir /REBOOTOK $INSTDIR\engines
         RmDir /REBOOTOK $INSTDIR\skins
@@ -518,4 +526,3 @@ Section "Uninstall"
     # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\Doomseeker\doomseeker.exe" "Doomseeker"
     # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe" "RCON utiliy"    
 SectionEnd
-

@@ -1,0 +1,74 @@
+
+    SetOutPath $INSTDIR   
+
+    # Create the uninstaller.
+    ${If} $portableInstallation == 0    
+		WriteUninstaller $INSTDIR\uninstall.exe
+    ${EndIf}
+    
+    # Create start menu shortcuts.
+    ${If} $portableInstallation == 0
+        SetOutPath $INSTDIR
+		# Start menu stuff
+        CreateShortcut "$SMPROGRAMS\Zandronum\Play Zandronum (Singleplayer).lnk" $INSTDIR\zandronum.exe
+        CreateShortcut "$SMPROGRAMS\Zandronum\Play Zandronum (Online).lnk" $INSTDIR\Doomseeker\doomseeker.exe
+        CreateShortcut "$DESKTOP\Play Zandronum (Online).lnk" $INSTDIR\Doomseeker\doomseeker.exe
+        #SetOutPath $INSTDIR\skulltalk
+        #CreateShortcut "$SMPROGRAMS\Skulltag\Chat with Skulltaggers.lnk" $INSTDIR\skulltalk\Skulltalk.exe
+        
+        SetOutPath $SMPROGRAMS\Zandronum
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Forum" "http://zandronum.com/forum/"
+                      
+        CreateDirectory $SMPROGRAMS\Zandronum\Tools
+        SetOutPath $SMPROGRAMS\Zandronum\Tools        
+		# [NW] Merge these two into a single tracker link instead of splitting them up. They go to the same place anyway. I may create splash pages later and change out this code to reflect it.
+        #!insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Report a bug" "http://skulltag.com/bugs/"
+        #!insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Request a feature" "http://skulltag.com/featurerequests/"
+        !insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Development Tracker" "http://zandronum.com/tracker"
+        #CreateShortcut "Manage server.lnk" $INSTDIR\rcon_utility.exe
+        CreateShortcut "Uninstall.lnk" $INSTDIR\uninstall.exe
+        
+        # Add/Remove programs entry.
+        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayName "$(^Name)"
+        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayVersion "${VERSION}"
+        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" Publisher "${COMPANY}"
+        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" URLInfoAbout "${URL}"
+        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayIcon $INSTDIR\uninstall.exe
+        WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" UninstallString $INSTDIR\uninstall.exe
+        WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoModify 1
+        WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoRepair 1
+    ${EndIf}
+    
+    # Associate .WAD and .PK3 files.
+    ${If} $portableInstallation == 0
+		${If} $shouldAssociate == 1
+			DetailPrint "Associating .WAD and .PK3 files..."
+			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file" "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
+			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file" "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
+		${EndIf}
+    ${EndIf}
+    
+    # Create exceptions in Windows Firewall. (All Networks - All IP Version - Enabled)
+    ${If} $portableInstallation == 0
+		DetailPrint "Creating exceptions in Windows Firewall..."    
+		# !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\zandronum.exe" "Zandronum"
+		# !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\Doomseeker\doomseeker.exe" "Doomseeker"
+#		# !insertmacro ADD_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe"   "RCON_utility"       
+    ${EndIf}
+    
+SectionEnd
+
+#---------------------------
+# The uninstaller's process.
+Section "Uninstall"
+    # $INSTDIR is the folder in which the uninstaller resides.
+    
+    # Delete game files.
+    ${If} $shouldRemoveAllFiles == 1
+        DetailPrint "Removing all files in $INSTDIR..."
+        RmDir /r /REBOOTOK $INSTDIR
+    ${Else}
+        DetailPrint "Removing stock Zandronum files..."
+	# Apparently uninstaller has to be deleted first...
+	delete $INSTDIR\uninstall.exe
+

@@ -1,0 +1,41 @@
+
+   ${EndIf}
+
+	# Remove the static configuration inside of AppData.
+    ${If} $shouldRemoveDSConfig == 1
+        Delete /REBOOTOK $APPDATA\.doomseeker\demos\*.*
+        RmDir /r /REBOOTOK $APPDATA\.doomseeker\demos
+        Delete /REBOOTOK doomseeker.ini
+        Delete /REBOOTOK doomseeker-irc.ini
+        Delete /REBOOTOK IpToCountry.csv
+        Delete /REBOOTOK Odamex
+        Delete /REBOOTOK Skulltag
+        Delete /REBOOTOK Vavoom
+        Delete /REBOOTOK Zandronum
+        Delete /REBOOTOK ZDaemon
+        Delete /REBOOTOK ChocolateDoom
+        Delete /REBOOTOK $APPDATA\.doomseeker\*.*
+        RmDir /r /REBOOTOK $APPDATA\.doomseeker
+    ${EndIf}
+
+    # Delete shortcuts and the Add/Remove entry.
+    ${If} $shouldRemoveShortcuts == 1		
+        Delete /REBOOTOK "$DESKTOP\Play Zandronum (Online).lnk"
+        RmDir /r /REBOOTOK "$SMPROGRAMS\Zandronum\"
+        SetShellVarContext all
+        RmDir /r /REBOOTOK "$SMPROGRAMS\Zandronum\"
+        DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
+    ${EndIf}
+    
+    
+    # Remove .WAD/.PK3 associations.
+    ${If} $shouldRemoveAssociations == 1
+        !insertmacro APP_UNASSOCIATE "wad" "Doom.wadfile"
+        !insertmacro APP_UNASSOCIATE "pk3" "ZDoom.wadfile"
+    ${EndIf}
+	
+    # Remove firewall exceptions.
+    # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\zandronum.exe" "Zandronum"
+    # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\Doomseeker\doomseeker.exe" "Doomseeker"
+    # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\rcon_utility.exe" "RCON utiliy"    
+SectionEnd
