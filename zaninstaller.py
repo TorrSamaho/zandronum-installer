@@ -22,21 +22,6 @@ if ' ' in args.version:
 	print("You should not have spaces in the argument (try underscores or hyphens).")
 	quit(1)
 
-versionnum = args.version
-
-###############################################################################
-# Ensure that we have all the NSIS installer files.                           #
-###############################################################################
-
-required_nsis_files = ["corefunctions.txt", "footer.txt", "header.txt", "postinstall.txt"]
-
-for reqfile in required_nsis_files:
-	pathreqfile = os.path.join (FRAGMENTS_PATH, reqfile)
-	if not os.path.isfile(pathreqfile):
-		print("You are missing a core NSIS text file:", pathreqfile)
-		quit(1)
-
-
 ###############################################################################
 # Collect all the files we want to add into a list.                           #
 ###############################################################################
@@ -74,8 +59,14 @@ if not installFilePathsDict.keys():
 textoutput = ""
 
 def readFragment(filename):
-	with open (os.path.join (FRAGMENTS_PATH, filename), 'r') as fp:
-		return fp.read()
+	fragmentPath = os.path.join (FRAGMENTS_PATH, filename)
+
+	try:
+		with open (fragmentPath, 'r') as fp:
+			return fp.read()
+	except FileNotFoundError:
+		print("You are missing a core NSIS text file:", fragmentPath)
+		quit(1)
 
 def generateInstallLines():
 	global textoutput
@@ -119,8 +110,8 @@ textoutput += readFragment('header.txt')
 
 # 2) Define the build based on the version.
 textoutput += "!define RELEASEBUILD\n"
-textoutput += "!define VERSION_NUM " + versionnum + "\n"
-textoutput += "!define VERSION " + versionnum + "\n"
+textoutput += "!define VERSION_NUM " + args.version + "\n"
+textoutput += "!define VERSION " + args.version + "\n"
 textoutput += "\n"
 
 # 3) Append the core functions that will be called
