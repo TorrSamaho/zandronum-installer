@@ -3,8 +3,12 @@
 
 import argparse
 import os
+import sys
 
 INSTRUCTIONS_FILE = ".instructions.txt"
+
+class InstallerGenError (Exception):
+	pass
 
 def getInstallFilePaths(base):
 	'''Returns a dictionary of files to install. The function is supplied the base path to walk
@@ -29,8 +33,7 @@ def getInstallFilePaths(base):
 
 	# We should have at least one file.
 	if not filedict['files']:
-		print("No files detected in the " + base + " folder, are you sure you set this up correctly?")
-		quit(1)
+		raise InstallerGenError("No files detected in the " + base + " folder, are you sure you set this up correctly?")
 
 	return filedict
 
@@ -42,8 +45,7 @@ def readFragment(filename, args):
 		with open (fragmentPath, 'r') as fp:
 			return fp.read()
 	except FileNotFoundError:
-		print("You are missing a core NSIS text file:", fragmentPath)
-		quit(1)
+		raise InstallerGenError("You are missing a core NSIS text file:", fragmentPath)
 
 def getFileinfoPaths (fileinfo):
 	'''Gets the directory names from the fileinfo. Paths aree sorted case-insensitively.'''
@@ -73,49 +75,51 @@ def generateUninstaller (fileinfo):
 
 def main():
 	'''The main installer routine'''
-	parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
-	parser.add_argument ('version')
-	parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
-	parser.add_argument ('--fragments-path', default='fragments')
-	parser.add_argument ('--files-path', default='files')
-	args = parser.parse_args()
+	try:
+		parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
+		parser.add_argument ('version')
+		parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
+		parser.add_argument ('--fragments-path', default='fragments')
+		parser.add_argument ('--files-path', default='files')
+		args = parser.parse_args()
 
-	# No spaces should be in the version number.
-	if ' ' in args.version:
-		print("You should not have spaces in the argument (try underscores or hyphens).")
-		quit(1)
+		# No spaces should be in the version number.
+		if ' ' in args.version:
+			raise InstallerGenError("You should not have spaces in the argument (try underscores or hyphens).")
 
-	filePaths = getInstallFilePaths(args.files_path)
+		filePaths = getInstallFilePaths(args.files_path)
 
-	# 1) Write the header
-	textoutput = ""
-	textoutput += readFragment('header.txt', args=args)
+		# 1) Write the header
+		textoutput = ""
+		textoutput += readFragment('header.txt', args=args)
 
-	# 2) Define the build based on the version.
-	textoutput += "!define RELEASEBUILD\n"
-	textoutput += "!define VERSION_NUM " + args.version + "\n"
-	textoutput += "!define VERSION " + args.version + "\n"
-	textoutput += "\n"
+		# 2) Define the build based on the version.
+		textoutput += "!define RELEASEBUILD\n"
+		textoutput += "!define VERSION_NUM " + args.version + "\n"
+		textoutput += "!define VERSION " + args.version + "\n"
+		textoutput += "\n"
 
-	# 3) Append the core functions that will be called
-	textoutput += readFragment('corefunctions.txt', args=args)
+		# 3) Append the core functions that will be called
+		textoutput += readFragment('corefunctions.txt', args=args)
 
-	# 4) Add the commands for the files.
-	textoutput += generateInstaller(filePaths)
+		# 4) Add the commands for the files.
+		textoutput += generateInstaller(filePaths)
 
-	# 5) Do the post-install functions/commands.
-	textoutput += readFragment('postinstall.txt', args=args)
+		# 5) Do the post-install functions/commands.
+		textoutput += readFragment('postinstall.txt', args=args)
 
-	# 6) Write the uninstaller.
-	textoutput += generateUninstaller(filePaths)
+		# 6) Write the uninstaller.
+		textoutput += generateUninstaller(filePaths)
 
-	# 7) Append the footer.
-	textoutput += readFragment ('footer.txt', args=args)
+		# 7) Append the footer.
+		textoutput += readFragment ('footer.txt', args=args)
 
-	# Write it to the installer file.
-	with open(args.output, "w") as f:
-		f.write(textoutput)
-		print(args.output, "written")
+		# Write it to the installer file.
+		with open(args.output, "w") as f:
+			f.write(textoutput)
+			print(args.output, "written")
+	except InstallerGenError as e:
+		print ('Error:', e, file=sys.stderr)
 
 if __name__ == '__main__':
 	main()
