@@ -8,12 +8,12 @@ FILES_PATH = 'files'
 FRAGMENTS_PATH = 'fragments'
 INSTRUCTIONS_FILE = ".instructions.txt"
 
-###############################################################################
-# Collect all the files we want to add into a list.                           #
-###############################################################################
-
-# Get all the files to install.
 def getInstallFilePaths(base):
+	'''Returns a dictionary of files to install. The function is supplied the base path to walk
+	through. The dictionary has two elements:
+		- basepath: i.e. the base parameter itself
+		- files: another dict that contains the files contained in each directory recursively.
+	'''
 	if base[-1] != '\\':
 		base += '\\'
 
@@ -36,11 +36,8 @@ def getInstallFilePaths(base):
 
 	return filedict
 
-###############################################################################
-# Write our information into the installer file.                              #
-###############################################################################
-
 def readFragment(filename):
+	'''Reads a file from the fragmens directory'''
 	fragmentPath = os.path.join (FRAGMENTS_PATH, filename)
 
 	try:
@@ -50,11 +47,12 @@ def readFragment(filename):
 		print("You are missing a core NSIS text file:", fragmentPath)
 		quit(1)
 
-# Sort the keys alphabetically and case-insensitive.
 def getFileinfoPaths (fileinfo):
+	'''Gets the directory names from the fileinfo. Paths aree sorted case-insensitively.'''
 	return sorted(list(fileinfo['files'].keys()), key=str.lower)
 
 def generateInstaller (fileinfo):
+	'''Generates the installer NSIS script'''
 	outlines = []
 	for installpath in getFileinfoPaths (fileinfo):
 		outlines.append(("    SetOutPath $INSTDIR\\" + installpath)[:-1])
@@ -63,6 +61,7 @@ def generateInstaller (fileinfo):
 	return '\n'.join(outlines)
 
 def generateUninstaller (fileinfo):
+	'''Generates the uninstaller NSIS script'''
 	paths = getFileinfoPaths (fileinfo)
 	outlines = []
 	for installpath in paths:
@@ -75,6 +74,7 @@ def generateUninstaller (fileinfo):
 	return '\n'.join(outlines)
 
 def main():
+	'''The main installer routine'''
 	parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
 	parser.add_argument ('version')
 	parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
