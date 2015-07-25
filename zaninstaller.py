@@ -4,7 +4,7 @@
 import argparse
 import os
 
-FILES_PATH = 'files/'
+FILES_PATH = 'files'
 FRAGMENTS_PATH = 'fragments'
 INSTRUCTIONS_FILE = ".instructions.txt"
 
@@ -28,35 +28,31 @@ if ' ' in args.version:
 
 # Get all the files to install.
 def getInstallFilePaths(base):
-	filedict = {}
+	if base[-1] != '\\':
+		base += '\\'
+
+	filedict = {'basepath': base, 'files': {}}
 	for (dirpath, dirnames, filenames) in os.walk(base):
 		# Append slash if missing, rework to all one slash type
 		dirpath = dirpath.replace ('/', '\\')
 		if dirpath[-1] != '\\':
 			dirpath += '\\'
-		filedict[dirpath] = []
+		dirpath = dirpath[len(base):]
+		filedict['files'][dirpath] = []
 		for filename in filenames:
 			if filename != INSTRUCTIONS_FILE:
-				filedict[dirpath].append(filename)
+				filedict['files'][dirpath].append(filename)
+
+	# We should have at least one file.
+	if not filedict:
+		print("No files detected in the " + base + " folder, are you sure you set this up correctly?")
+		quit(1)
+
 	return filedict
-
-installFilePathsDict = getInstallFilePaths(FILES_PATH)
-
-# Sort the keys alphabetically and case-insensitive.
-installFilePathKeys = list(installFilePathsDict.keys())
-installFilePathKeys.sort(key=str.lower)
-
-# We should have at least one file.
-if not installFilePathsDict.keys():
-	print("No files detected in the " + FILES_PATH + " folder, are you sure you set this up correctly?")
-	quit(1)
-
 
 ###############################################################################
 # Write our information into the installer file.                              #
 ###############################################################################
-
-textoutput = ""
 
 def readFragment(filename):
 	fragmentPath = os.path.join (FRAGMENTS_PATH, filename)
@@ -68,44 +64,44 @@ def readFragment(filename):
 		print("You are missing a core NSIS text file:", fragmentPath)
 		quit(1)
 
-def generateInstallLines():
-	global textoutput
-	global FILES_PATH
-	global installFilePathsDict
-	global installFilePathKeys
-	outlines = []
-	for installpath in installFilePathKeys:
-		path = "    SetOutPath $INSTDIR\\" + installpath[len(FILES_PATH):]
-		path = path[:-1]
-		outlines.append(path + "\n")
-		for filepath in installFilePathsDict[installpath]:
-			outlines.append("        File " + installpath + filepath + "\n")
-	return outlines
+# Sort the keys alphabetically and case-insensitive.
+def getFileinfoPaths (fileinfo):
+	return sorted(list(fileinfo['files'].keys()), key=str.lower)
 
-def generateUnInstallLines():
-	global textoutput
-	global FILES_PATH
-	global installFilePathsDict
-	global installFilePathKeys
+def generateInstaller (fileinfo):
 	outlines = []
-	for installpath in installFilePathKeys:
-		path = "    SetOutPath $INSTDIR\\" + installpath[len(FILES_PATH):]
+	for installpath in getFileinfoPaths (fileinfo):
+		path = "    SetOutPath $INSTDIR\\" + installpath
 		path = path[:-1]
-		outlines.append(path + "\n")
-		for filepath in installFilePathsDict[installpath]:
-			outlines.append("        Delete /REBOOTOK " + filepath + "\n")
-	outlines.append("    SetOutPath $TEMP\n")
+		outlines.append(path)
+		for filepath in fileinfo['files'][installpath]:
+			outlines.append("        File " + fileinfo['basepath'] + installpath + filepath)
+	return '\n'.join(outlines)
+
+def generateUninstaller (fileinfo):
+	paths = getFileinfoPaths (fileinfo)
+	outlines = []
+	for installpath in paths:
+		path = "    SetOutPath $INSTDIR\\" + installpath
+		path = path[:-1]
+		outlines.append(path)
+		for filepath in fileinfo['files'][installpath]:
+			outlines.append("        Delete /REBOOTOK " + filepath)
+	outlines.append("    SetOutPath $TEMP")
 	endpaths = []
-	for installpath in installFilePathKeys:
-		dirpath = "        RmDir /REBOOTOK $INSTDIR\\" + installpath[len(FILES_PATH):]
+	for installpath in paths:
+		dirpath = "        RmDir /REBOOTOK $INSTDIR\\" + installpath
 		dirpath = dirpath[:-1]
-		endpaths.append(dirpath + "\n")
+		endpaths.append(dirpath)
 	endpaths.reverse()
 	for endpath in endpaths:
 		outlines.append(endpath)
-	return outlines
+	return '\n'.join(outlines)
+
+filePaths = getInstallFilePaths('files')
 
 # 1) Write the header
+textoutput = ""
 textoutput += readFragment('header.txt')
 
 # 2) Define the build based on the version.
@@ -118,17 +114,13 @@ textoutput += "\n"
 textoutput += readFragment('corefunctions.txt')
 
 # 4) Add the commands for the files.
-instlines = generateInstallLines()
-for instline in instlines:
-	textoutput += instline
+textoutput += generateInstaller(filePaths)
 
 # 5) Do the post-install functions/commands.
 textoutput += readFragment('postinstall.txt')
 
 # 6) Write the uninstaller.
-uninstlines = generateUnInstallLines()
-for uninstline in uninstlines:
-	textoutput += uninstline
+textoutput += generateUninstaller(filePaths)
 
 # 7) Append the footer.
 textoutput += readFragment ('footer.txt')
