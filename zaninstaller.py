@@ -4,8 +4,6 @@
 import argparse
 import os
 
-FILES_PATH = 'files'
-FRAGMENTS_PATH = 'fragments'
 INSTRUCTIONS_FILE = ".instructions.txt"
 
 def getInstallFilePaths(base):
@@ -36,9 +34,9 @@ def getInstallFilePaths(base):
 
 	return filedict
 
-def readFragment(filename):
+def readFragment(filename, args):
 	'''Reads a file from the fragmens directory'''
-	fragmentPath = os.path.join (FRAGMENTS_PATH, filename)
+	fragmentPath = os.path.join (args.fragments_path, filename)
 
 	try:
 		with open (fragmentPath, 'r') as fp:
@@ -78,6 +76,8 @@ def main():
 	parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
 	parser.add_argument ('version')
 	parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
+	parser.add_argument ('--fragments-path', default='fragments')
+	parser.add_argument ('--files-path', default='files')
 	args = parser.parse_args()
 
 	# No spaces should be in the version number.
@@ -85,11 +85,11 @@ def main():
 		print("You should not have spaces in the argument (try underscores or hyphens).")
 		quit(1)
 
-	filePaths = getInstallFilePaths('files')
+	filePaths = getInstallFilePaths(args.files_path)
 
 	# 1) Write the header
 	textoutput = ""
-	textoutput += readFragment('header.txt')
+	textoutput += readFragment('header.txt', args=args)
 
 	# 2) Define the build based on the version.
 	textoutput += "!define RELEASEBUILD\n"
@@ -98,19 +98,19 @@ def main():
 	textoutput += "\n"
 
 	# 3) Append the core functions that will be called
-	textoutput += readFragment('corefunctions.txt')
+	textoutput += readFragment('corefunctions.txt', args=args)
 
 	# 4) Add the commands for the files.
 	textoutput += generateInstaller(filePaths)
 
 	# 5) Do the post-install functions/commands.
-	textoutput += readFragment('postinstall.txt')
+	textoutput += readFragment('postinstall.txt', args=args)
 
 	# 6) Write the uninstaller.
 	textoutput += generateUninstaller(filePaths)
 
 	# 7) Append the footer.
-	textoutput += readFragment ('footer.txt')
+	textoutput += readFragment ('footer.txt', args=args)
 
 	# Write it to the installer file.
 	with open(args.output, "w") as f:
