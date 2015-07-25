@@ -1,30 +1,28 @@
 #!/usr/bin/env python3
 # Copyright (c) Chris K, Torr Samaho, Zandronum development team; 2015
 
-import sys
+import argparse
 import os
 
 FILES_PATH = 'files/'
 FRAGMENTS_PATH = 'fragments'
 INSTRUCTIONS_FILE = ".instructions.txt"
 
+parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
+parser.add_argument ('version')
+parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
+args = parser.parse_args()
 
 ###############################################################################
 # Retrieve the version number and ensure it's valid.                          #
 ###############################################################################
 
-# Make sure a version was supplied.
-if len(sys.argv) <= 1:
-	print("Please provide a version number as an argument.")
-	sys.exit(1)
-
 # No spaces should be in the version number.
-if ' ' in sys.argv[1]:
+if ' ' in args.version:
 	print("You should not have spaces in the argument (try underscores or hyphens).")
-	sys.exit(1)
+	quit(1)
 
-versionnum = sys.argv[1]
-
+versionnum = args.version
 
 ###############################################################################
 # Ensure that we have all the NSIS installer files.                           #
@@ -36,7 +34,7 @@ for reqfile in required_nsis_files:
 	pathreqfile = os.path.join (FRAGMENTS_PATH, reqfile)
 	if not os.path.isfile(pathreqfile):
 		print("You are missing a core NSIS text file:", pathreqfile)
-		sys.exit(1)
+		quit(1)
 
 
 ###############################################################################
@@ -66,7 +64,7 @@ installFilePathKeys.sort(key=str.lower)
 # We should have at least one file.
 if not installFilePathsDict.keys():
 	print("No files detected in the " + FILES_PATH + " folder, are you sure you set this up correctly?")
-	sys.exit(1)
+	quit(1)
 
 
 ###############################################################################
@@ -145,5 +143,6 @@ for uninstline in uninstlines:
 textoutput += readFragment ('footer.txt')
 
 # Write it to the installer file.
-with open("ZanInstaller.nsi", "w") as f:
+with open(args.output, "w") as f:
 	f.write(textoutput)
+	print(args.output, "written")
