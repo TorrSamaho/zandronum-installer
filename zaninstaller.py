@@ -71,9 +71,7 @@ def getFileinfoPaths (fileinfo):
 def generateInstaller (fileinfo):
 	outlines = []
 	for installpath in getFileinfoPaths (fileinfo):
-		path = "    SetOutPath $INSTDIR\\" + installpath
-		path = path[:-1]
-		outlines.append(path)
+		outlines.append(("    SetOutPath $INSTDIR\\" + installpath)[:-1])
 		for filepath in fileinfo['files'][installpath]:
 			outlines.append("        File " + fileinfo['basepath'] + installpath + filepath)
 	return '\n'.join(outlines)
@@ -82,20 +80,12 @@ def generateUninstaller (fileinfo):
 	paths = getFileinfoPaths (fileinfo)
 	outlines = []
 	for installpath in paths:
-		path = "    SetOutPath $INSTDIR\\" + installpath
-		path = path[:-1]
-		outlines.append(path)
+		outlines.append(("    SetOutPath $INSTDIR\\" + installpath)[:-1])
 		for filepath in fileinfo['files'][installpath]:
 			outlines.append("        Delete /REBOOTOK " + filepath)
 	outlines.append("    SetOutPath $TEMP")
-	endpaths = []
-	for installpath in paths:
-		dirpath = "        RmDir /REBOOTOK $INSTDIR\\" + installpath
-		dirpath = dirpath[:-1]
-		endpaths.append(dirpath)
-	endpaths.reverse()
-	for endpath in endpaths:
-		outlines.append(endpath)
+	for installpath in paths[::-1]:
+		outlines.append(("        RmDir /REBOOTOK $INSTDIR\\" + installpath)[:-1])
 	return '\n'.join(outlines)
 
 filePaths = getInstallFilePaths('files')
