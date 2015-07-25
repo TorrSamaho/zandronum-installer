@@ -5,7 +5,7 @@ import sys
 import os
 
 FILES_PATH = 'files/'
-FRAGMENTS_PATH = 'fragments/'
+FRAGMENTS_PATH = 'fragments'
 INSTRUCTIONS_FILE = ".instructions.txt"
 
 
@@ -33,7 +33,7 @@ versionnum = sys.argv[1]
 required_nsis_files = ["corefunctions.txt", "footer.txt", "header.txt", "postinstall.txt"]
 
 for reqfile in required_nsis_files:
-	pathreqfile = FRAGMENTS_PATH + reqfile
+	pathreqfile = os.path.join (FRAGMENTS_PATH, reqfile)
 	if not os.path.isfile(pathreqfile):
 		print("You are missing a core NSIS text file:", pathreqfile)
 		sys.exit(1)
@@ -48,21 +48,23 @@ def getInstallFilePaths(base):
 	filedict = {}
 	for (dirpath, dirnames, filenames) in os.walk(base):
 		# Append slash if missing, rework to all one slash type
-		properdirpath = (dirpath + ("/" if dirpath[-1] != "/" else "")).replace("/", "\\") # Hopefully no linux or mac...
-		filedict[properdirpath] = []
+		dirpath = dirpath.replace ('/', '\\')
+		if dirpath[-1] != '\\':
+			dirpath += '\\'
+		filedict[dirpath] = []
 		for filename in filenames:
 			if filename != INSTRUCTIONS_FILE:
-				filedict[properdirpath].append(filename)
+				filedict[dirpath].append(filename)
 	return filedict
 
 installFilePathsDict = getInstallFilePaths(FILES_PATH)
 
 # Sort the keys alphabetically and case-insensitive.
-installFilePathKeys = [k for k in installFilePathsDict.keys()]
+installFilePathKeys = list(installFilePathsDict.keys())
 installFilePathKeys.sort(key=str.lower)
 
 # We should have at least one file.
-if len(installFilePathsDict.keys()) == 0:
+if not installFilePathsDict.keys():
 	print("No files detected in the " + FILES_PATH + " folder, are you sure you set this up correctly?")
 	sys.exit(1)
 
@@ -73,12 +75,9 @@ if len(installFilePathsDict.keys()) == 0:
 
 textoutput = ""
 
-def appendLinesFromFile(filepath):
-	global textoutput
-	with open(filepath) as f:
-		lines = f.readlines()
-		for line in lines:
-			textoutput += line
+def readFragment(filename):
+	with open (os.path.join (FRAGMENTS_PATH, filename), 'r') as fp:
+		return fp.read()
 
 def generateInstallLines():
 	global textoutput
@@ -118,7 +117,7 @@ def generateUnInstallLines():
 	return outlines
 
 # 1) Write the header
-appendLinesFromFile("fragments/header.txt")
+textoutput += readFragment('header.txt')
 
 # 2) Define the build based on the version.
 textoutput += "!define RELEASEBUILD\n"
@@ -127,7 +126,7 @@ textoutput += "!define VERSION " + versionnum + "\n"
 textoutput += "\n"
 
 # 3) Append the core functions that will be called
-appendLinesFromFile(FRAGMENTS_PATH + "corefunctions.txt")
+textoutput += readFragment('corefunctions.txt')
 
 # 4) Add the commands for the files.
 instlines = generateInstallLines()
@@ -135,7 +134,7 @@ for instline in instlines:
 	textoutput += instline
 
 # 5) Do the post-install functions/commands.
-appendLinesFromFile(FRAGMENTS_PATH + "postinstall.txt")
+textoutput += readFragment('postinstall.txt')
 
 # 6) Write the uninstaller.
 uninstlines = generateUnInstallLines()
@@ -143,7 +142,7 @@ for uninstline in uninstlines:
 	textoutput += uninstline
 
 # 7) Append the footer.
-appendLinesFromFile(FRAGMENTS_PATH + "footer.txt")
+textoutput += readFragment ('footer.txt')
 
 # Write it to the installer file.
 with open("ZanInstaller.nsi", "w") as f:
