@@ -8,20 +8,6 @@ FILES_PATH = 'files'
 FRAGMENTS_PATH = 'fragments'
 INSTRUCTIONS_FILE = ".instructions.txt"
 
-parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
-parser.add_argument ('version')
-parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
-args = parser.parse_args()
-
-###############################################################################
-# Retrieve the version number and ensure it's valid.                          #
-###############################################################################
-
-# No spaces should be in the version number.
-if ' ' in args.version:
-	print("You should not have spaces in the argument (try underscores or hyphens).")
-	quit(1)
-
 ###############################################################################
 # Collect all the files we want to add into a list.                           #
 ###############################################################################
@@ -44,7 +30,7 @@ def getInstallFilePaths(base):
 				filedict['files'][dirpath].append(filename)
 
 	# We should have at least one file.
-	if not filedict:
+	if not filedict['files']:
 		print("No files detected in the " + base + " folder, are you sure you set this up correctly?")
 		quit(1)
 
@@ -88,34 +74,48 @@ def generateUninstaller (fileinfo):
 		outlines.append(("        RmDir /REBOOTOK $INSTDIR\\" + installpath)[:-1])
 	return '\n'.join(outlines)
 
-filePaths = getInstallFilePaths('files')
+def main():
+	parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
+	parser.add_argument ('version')
+	parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
+	args = parser.parse_args()
 
-# 1) Write the header
-textoutput = ""
-textoutput += readFragment('header.txt')
+	# No spaces should be in the version number.
+	if ' ' in args.version:
+		print("You should not have spaces in the argument (try underscores or hyphens).")
+		quit(1)
 
-# 2) Define the build based on the version.
-textoutput += "!define RELEASEBUILD\n"
-textoutput += "!define VERSION_NUM " + args.version + "\n"
-textoutput += "!define VERSION " + args.version + "\n"
-textoutput += "\n"
+	filePaths = getInstallFilePaths('files')
 
-# 3) Append the core functions that will be called
-textoutput += readFragment('corefunctions.txt')
+	# 1) Write the header
+	textoutput = ""
+	textoutput += readFragment('header.txt')
 
-# 4) Add the commands for the files.
-textoutput += generateInstaller(filePaths)
+	# 2) Define the build based on the version.
+	textoutput += "!define RELEASEBUILD\n"
+	textoutput += "!define VERSION_NUM " + args.version + "\n"
+	textoutput += "!define VERSION " + args.version + "\n"
+	textoutput += "\n"
 
-# 5) Do the post-install functions/commands.
-textoutput += readFragment('postinstall.txt')
+	# 3) Append the core functions that will be called
+	textoutput += readFragment('corefunctions.txt')
 
-# 6) Write the uninstaller.
-textoutput += generateUninstaller(filePaths)
+	# 4) Add the commands for the files.
+	textoutput += generateInstaller(filePaths)
 
-# 7) Append the footer.
-textoutput += readFragment ('footer.txt')
+	# 5) Do the post-install functions/commands.
+	textoutput += readFragment('postinstall.txt')
 
-# Write it to the installer file.
-with open(args.output, "w") as f:
-	f.write(textoutput)
-	print(args.output, "written")
+	# 6) Write the uninstaller.
+	textoutput += generateUninstaller(filePaths)
+
+	# 7) Append the footer.
+	textoutput += readFragment ('footer.txt')
+
+	# Write it to the installer file.
+	with open(args.output, "w") as f:
+		f.write(textoutput)
+		print(args.output, "written")
+
+if __name__ == '__main__':
+	main()
