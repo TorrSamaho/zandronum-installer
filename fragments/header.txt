@@ -1,6 +1,6 @@
 #==============================================================================
 # Zandronum Installer
 # Copyright (c) 2010 Rivecoder, Eruanna
-# Copyright (c) 2014 Zandronum development team, Water, Torr Samaho
+# Copyright (c) 2014-2015 Zandronum development team, Chris K, Torr Samaho
 #==============================================================================
 

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Copyright (c) Water, Torr Samaho, Zandronum development team; 2014 
+# Copyright (c) Chris K, Torr Samaho, Zandronum development team; 2014 
 
 use 5.010;
 use Cwd;
@@ -105,7 +105,7 @@ sub createUninstallLines
 			}
 		} 
 		
-		# Add the file now
+		# Delete the file now
 		push(@outputLines, "        Delete /REBOOTOK \"$file\"\n");
 	}
 	
