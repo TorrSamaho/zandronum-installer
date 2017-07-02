@@ -16,26 +16,25 @@ def getInstallFilePaths(base):
 		- basepath: i.e. the base parameter itself
 		- files: another dict that contains the files contained in each directory recursively.
 	'''
-	if base[-1] != '\\':
-		base += '\\'
+	oldpath = os.getcwd()
+	try:
+		os.chdir(base)
+		filedict = {'basepath': base + '\\', 'files': {}}
+		for (dirpath, dirnames, filenames) in os.walk('.'):
+			# Append slash if missing, rework to all one slash type
+			dirpath = '\\'.join(dirpath.split(os.path.sep)[1:]) + '\\'
+			filedict['files'][dirpath] = []
+			for filename in filenames:
+				if filename != INSTRUCTIONS_FILE:
+					filedict['files'][dirpath].append(filename)
 
-	filedict = {'basepath': base, 'files': {}}
-	for (dirpath, dirnames, filenames) in os.walk(base):
-		# Append slash if missing, rework to all one slash type
-		dirpath = dirpath.replace ('/', '\\')
-		if dirpath[-1] != '\\':
-			dirpath += '\\'
-		dirpath = dirpath[len(base):]
-		filedict['files'][dirpath] = []
-		for filename in filenames:
-			if filename != INSTRUCTIONS_FILE:
-				filedict['files'][dirpath].append(filename)
+		# We should have at least one file.
+		if not filedict['files']:
+			raise InstallerGenError("No files detected in the " + base + " folder, are you sure you set this up correctly?")
 
-	# We should have at least one file.
-	if not filedict['files']:
-		raise InstallerGenError("No files detected in the " + base + " folder, are you sure you set this up correctly?")
-
-	return filedict
+		return filedict
+	finally:
+		os.chdir(oldpath)
 
 def readFragment(filename, args):
 	'''Reads a file from the fragmens directory'''
@@ -55,7 +54,7 @@ def generateInstaller (fileinfo):
 	'''Generates the installer NSIS script'''
 	outlines = []
 	for installpath in getFileinfoPaths (fileinfo):
-		outlines.append(("    SetOutPath $INSTDIR\\" + installpath)[:-1])
+		outlines.append(("    SetOutPath $INSTDIR\\" + installpath))
 		for filepath in fileinfo['files'][installpath]:
 			outlines.append("        File " + fileinfo['basepath'] + installpath + filepath)
 	return '\n'.join(outlines)
@@ -65,12 +64,12 @@ def generateUninstaller (fileinfo):
 	paths = getFileinfoPaths (fileinfo)
 	outlines = []
 	for installpath in paths:
-		outlines.append(("    SetOutPath $INSTDIR\\" + installpath)[:-1])
+		outlines.append(("    SetOutPath $INSTDIR\\" + installpath))
 		for filepath in fileinfo['files'][installpath]:
 			outlines.append("        Delete /REBOOTOK " + filepath)
 	outlines.append("    SetOutPath $TEMP")
 	for installpath in paths[::-1]:
-		outlines.append(("        RmDir /REBOOTOK $INSTDIR\\" + installpath)[:-1])
+		outlines.append(("        RmDir /REBOOTOK $INSTDIR\\" + installpath))
 	return '\n'.join(outlines)
 
 def main():
