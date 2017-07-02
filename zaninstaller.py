@@ -10,6 +10,12 @@ INSTRUCTIONS_FILE = ".instructions.txt"
 class InstallerGenError (Exception):
 	pass
 
+def quote(string):
+	if '"' in string:
+		return "'" + string + "'"
+	else:
+		return '"' + string + '"'
+
 def getInstallFilePaths(base):
 	'''Returns a dictionary of files to install. The function is supplied the base path to walk
 	through. The dictionary has two elements:
@@ -54,9 +60,9 @@ def generateInstaller (fileinfo):
 	'''Generates the installer NSIS script'''
 	outlines = []
 	for installpath in getFileinfoPaths (fileinfo):
-		outlines.append(("    SetOutPath $INSTDIR\\" + installpath))
+		outlines.append("    SetOutPath " + quote("$INSTDIR\\" + installpath))
 		for filepath in fileinfo['files'][installpath]:
-			outlines.append("        File " + fileinfo['basepath'] + installpath + filepath)
+			outlines.append("        File " + quote(fileinfo['basepath'] + installpath + filepath))
 	return '\n'.join(outlines)
 
 def generateUninstaller (fileinfo):
@@ -64,12 +70,12 @@ def generateUninstaller (fileinfo):
 	paths = getFileinfoPaths (fileinfo)
 	outlines = []
 	for installpath in paths:
-		outlines.append(("    SetOutPath $INSTDIR\\" + installpath))
+		outlines.append("    SetOutPath " + quote("$INSTDIR\\" + installpath))
 		for filepath in fileinfo['files'][installpath]:
-			outlines.append("        Delete /REBOOTOK " + filepath)
+			outlines.append("        Delete /REBOOTOK " + quote(filepath))
 	outlines.append("    SetOutPath $TEMP")
 	for installpath in paths[::-1]:
-		outlines.append(("        RmDir /REBOOTOK $INSTDIR\\" + installpath))
+		outlines.append("        RmDir /REBOOTOK " + quote("$INSTDIR\\" + installpath))
 	return '\n'.join(outlines)
 
 def main():
