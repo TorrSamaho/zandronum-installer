@@ -64,11 +64,7 @@ Section "Uninstall"
     # $INSTDIR is the folder in which the uninstaller resides.
     
     # Delete game files.
-    ${If} $shouldRemoveAllFiles == 1
-        DetailPrint "Removing all files in $INSTDIR..."
-        RmDir /r /REBOOTOK $INSTDIR
-    ${Else}
-        DetailPrint "Removing stock Zandronum files..."
+    DetailPrint "Removing stock Zandronum files..."
 	# Apparently uninstaller has to be deleted first...
 	delete $INSTDIR\uninstall.exe
 

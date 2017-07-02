@@ -1,6 +1,4 @@
 
-   ${EndIf}
-
 	# Remove the static configuration inside of AppData.
     ${If} $shouldRemoveDSConfig == 1
         Delete /REBOOTOK $APPDATA\.doomseeker\demos\*.*

@@ -74,7 +74,6 @@ ShowUninstDetails show
 Var portableInstallation
 Var shouldAssociate
 Var shouldRemoveShortcuts
-Var shouldRemoveAllFiles
 Var shouldRemoveAssociations
 Var shouldRemoveDSConfig
 
@@ -84,7 +83,6 @@ Var button_Browse
 Var check_PortableInstall
 Var check_Associate
 Var check_RemoveShortcuts
-Var check_RemoveAllFiles
 Var check_RemoveAssociations
 Var check_RemoveConfig
 !define NSD_SETCHECK `!insertmacro _NSD_SETCHECK`
@@ -120,11 +118,8 @@ Function un.nsUninstaller_create
         Pop $check_RemoveAssociations
     ${NSD_CreateCheckbox} 24u 78u -28u 10u "Remove static Doomseeker configuration"
         Pop $check_RemoveConfig
-    ${NSD_CreateCheckbox} 24u 90u -28u 10u "Remove all files in the Zandronum folder"
-        Pop $check_RemoveAllFiles
     ${NSD_SETCHECK} $check_RemoveShortcuts 1
     ${NSD_SETCHECK} $check_RemoveAssociations 1    
-    ${NSD_SETCHECK} $check_RemoveAllFiles 0
 	${NSD_SETCHECK} $check_RemoveConfig 0
     
     nsDialogs::Show
@@ -132,7 +127,6 @@ FunctionEnd
 
 Function un.nsUninstaller_exit
     ${NSD_GetState} $check_RemoveShortcuts $shouldRemoveShortcuts
-    ${NSD_GetState} $check_RemoveAllFiles $shouldRemoveAllFiles
     ${NSD_GetState} $check_RemoveAssociations $shouldRemoveAssociations
     ${NSD_GetState} $check_RemoveConfig $shouldRemoveDSConfig
 FunctionEnd
