@@ -54,7 +54,7 @@ def readFragment(filename, args):
 
 def getFileinfoPaths (fileinfo):
 	'''Gets the directory names from the fileinfo. Paths aree sorted case-insensitively.'''
-	return sorted(list(fileinfo['files'].keys()), key=str.lower)
+	return sorted(fileinfo['files'].keys(), key=str.lower)
 
 def generateInstaller (fileinfo):
 	'''Generates the installer NSIS script'''
