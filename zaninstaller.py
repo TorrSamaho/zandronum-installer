@@ -7,14 +7,17 @@ import sys
 
 INSTRUCTIONS_FILE = ".instructions.txt"
 
+
 class InstallerGenError (Exception):
 	pass
+
 
 def quote(string):
 	if '"' in string:
 		return "'" + string + "'"
 	else:
 		return '"' + string + '"'
+
 
 def getInstallFilePaths(base):
 	'''Returns a dictionary of files to install. The function is supplied the base path to walk
@@ -36,38 +39,45 @@ def getInstallFilePaths(base):
 
 		# We should have at least one file.
 		if not filedict['files']:
-			raise InstallerGenError("No files detected in the " + base + " folder, are you sure you set this up correctly?")
+			raise InstallerGenError("No files detected in the " +
+			                        base + " folder, are you sure you set this up correctly?")
 
 		return filedict
 	finally:
 		os.chdir(oldpath)
 
+
 def readFragment(filename, args):
 	'''Reads a file from the fragmens directory'''
-	fragmentPath = os.path.join (args.fragments_path, filename)
+	fragmentPath = os.path.join(args.fragments_path, filename)
 
 	try:
-		with open (fragmentPath, 'r') as fp:
+		with open(fragmentPath, 'r') as fp:
 			return fp.read()
 	except FileNotFoundError:
-		raise InstallerGenError("You are missing a core NSIS text file:", fragmentPath)
+		raise InstallerGenError(
+			"You are missing a core NSIS text file:", fragmentPath)
 
-def getFileinfoPaths (fileinfo):
+
+def getFileinfoPaths(fileinfo):
 	'''Gets the directory names from the fileinfo. Paths aree sorted case-insensitively.'''
 	return sorted(fileinfo['files'].keys(), key=str.lower)
 
-def generateInstaller (fileinfo):
+
+def generateInstaller(fileinfo):
 	'''Generates the installer NSIS script'''
 	outlines = []
-	for installpath in getFileinfoPaths (fileinfo):
+	for installpath in getFileinfoPaths(fileinfo):
 		outlines.append("    SetOutPath " + quote("$INSTDIR\\" + installpath))
 		for filepath in fileinfo['files'][installpath]:
-			outlines.append("        File " + quote(fileinfo['basepath'] + installpath + filepath))
+			outlines.append("        File " +
+			                quote(fileinfo['basepath'] + installpath + filepath))
 	return '\n'.join(outlines)
 
-def generateUninstaller (fileinfo):
+
+def generateUninstaller(fileinfo):
 	'''Generates the uninstaller NSIS script'''
-	paths = getFileinfoPaths (fileinfo)
+	paths = getFileinfoPaths(fileinfo)
 	outlines = []
 	for installpath in paths:
 		outlines.append("    SetOutPath " + quote("$INSTDIR\\" + installpath))
@@ -75,22 +85,26 @@ def generateUninstaller (fileinfo):
 			outlines.append("        Delete /REBOOTOK " + quote(filepath))
 	outlines.append("    SetOutPath $TEMP")
 	for installpath in paths[::-1]:
-		outlines.append("        RmDir /REBOOTOK " + quote("$INSTDIR\\" + installpath))
+		outlines.append("        RmDir /REBOOTOK " +
+		                quote("$INSTDIR\\" + installpath))
 	return '\n'.join(outlines)
+
 
 def main():
 	'''The main installer routine'''
 	try:
-		parser = argparse.ArgumentParser (description='Generates an NSIS installer script for Zandronum')
-		parser.add_argument ('version')
-		parser.add_argument ('-o', '--output', default='ZanInstaller.nsi')
-		parser.add_argument ('--fragments-path', default='fragments')
-		parser.add_argument ('--files-path', default='files')
+		parser = argparse.ArgumentParser(
+			description='Generates an NSIS installer script for Zandronum')
+		parser.add_argument('version')
+		parser.add_argument('-o', '--output', default='ZanInstaller.nsi')
+		parser.add_argument('--fragments-path', default='fragments')
+		parser.add_argument('--files-path', default='files')
 		args = parser.parse_args()
 
 		# No spaces should be in the version number.
 		if ' ' in args.version:
-			raise InstallerGenError("You should not have spaces in the argument (try underscores or hyphens).")
+			raise InstallerGenError(
+				"You should not have spaces in the argument (try underscores or hyphens).")
 
 		filePaths = getInstallFilePaths(args.files_path)
 
@@ -117,14 +131,15 @@ def main():
 		textoutput += generateUninstaller(filePaths)
 
 		# 7) Append the footer.
-		textoutput += readFragment ('footer.txt', args=args)
+		textoutput += readFragment('footer.txt', args=args)
 
 		# Write it to the installer file.
 		with open(args.output, "w") as f:
 			f.write(textoutput)
 			print(args.output, "written")
 	except InstallerGenError as e:
-		print ('Error:', e, file=sys.stderr)
+		print('Error:', e, file=sys.stderr)
+
 
 if __name__ == '__main__':
 	main()
