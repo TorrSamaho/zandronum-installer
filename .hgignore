@@ -2,6 +2,7 @@ syntax:glob
 *.exe
 *.nsi
 files/*
+.vscode
 
 syntax: regex
 ^files/(?!instructions.txt)
