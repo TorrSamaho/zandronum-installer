@@ -8,7 +8,7 @@ import sys
 INSTRUCTIONS_FILE = ".instructions.txt"
 
 
-class InstallerGenError (Exception):
+class InstallerGenError(Exception):
     pass
 
 
@@ -60,7 +60,7 @@ def readFragment(filename, args):
 
 
 def getFileinfoPaths(fileinfo):
-    '''Gets the directory names from the fileinfo. Paths aree sorted case-insensitively.'''
+    '''Gets the directory names from the fileinfo. Paths are sorted case-insensitively.'''
     return sorted(fileinfo['files'].keys(), key=str.lower)
 
 
