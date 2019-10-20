@@ -2,8 +2,8 @@
 |                          Zandronum Installer Readme                     v1.1 |
 --------------------------------------------------------------------------------
 | Requirements:                                                                |
-|    - NSIS v3.0b1 (should work with older versions)                           |
-|    - Python 3 (tested with 3.4.3)                                            |
+|    - NSIS v3.04 (should work with older versions)                            |
+|    - Python 3 (tested with 3.7.4)                                            |
 |------------------------------------------------------------------------------|
 | How to run:                                                                  |
 |    Put all the files you want to bundle into the installer in the 'files/'   |
@@ -16,5 +16,8 @@
 |    When running on the command line, run it with the version number.         |
 |    Ex:                                                                       |
 |        python3 zaninstaller.py 2.0                                           |
+|                                                                              |
+|    The python script generates an .nsi file, which has to be compiled with   |
+|    NSIS.                                                                     |
 \==============================================================================/
 
