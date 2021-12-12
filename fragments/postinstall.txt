@@ -9,7 +9,8 @@
     # Create start menu shortcuts.
     ${If} $portableInstallation == 0
         SetOutPath $INSTDIR
-		# Start menu stuff
+        # Start menu stuff
+        CreateDirectory $SMPROGRAMS\Zandronum
         CreateShortcut "$SMPROGRAMS\Zandronum\Play Zandronum (Singleplayer).lnk" $INSTDIR\zandronum.exe
         CreateShortcut "$SMPROGRAMS\Zandronum\Play Zandronum (Online).lnk" $INSTDIR\Doomseeker\doomseeker.exe
         CreateShortcut "$DESKTOP\Play Zandronum (Online).lnk" $INSTDIR\Doomseeker\doomseeker.exe
@@ -21,7 +22,7 @@
                       
         CreateDirectory $SMPROGRAMS\Zandronum\Tools
         SetOutPath $SMPROGRAMS\Zandronum\Tools        
-		# [NW] Merge these two into a single tracker link instead of splitting them up. They go to the same place anyway. I may create splash pages later and change out this code to reflect it.
+        # [NW] Merge these two into a single tracker link instead of splitting them up. They go to the same place anyway. I may create splash pages later and change out this code to reflect it.
         #!insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Report a bug" "http://skulltag.com/bugs/"
         #!insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Request a feature" "http://skulltag.com/featurerequests/"
         !insertmacro CreateInternetShortcut "$SMPROGRAMS\Zandronum\Tools\Development Tracker" "http://zandronum.com/tracker"
