@@ -78,6 +78,8 @@ Var shouldAssociate
 Var shouldRemoveShortcuts
 Var shouldRemoveAssociations
 Var shouldRemoveDSConfig
+Var shouldAssociateUrlScheme
+Var shouldRemoveUrlSchemeAssociations
 
 # Form elements
 Var textbox_Path
@@ -87,6 +89,8 @@ Var check_Associate
 Var check_RemoveShortcuts
 Var check_RemoveAssociations
 Var check_RemoveConfig
+Var check_AssociateUrlScheme
+Var check_RemoveUrlSchemeAssociations
 !define NSD_SETCHECK `!insertmacro _NSD_SETCHECK`
 !macro _NSD_SETCHECK NAME TOGGLE
     ${If} ${TOGGLE} == 1
@@ -118,10 +122,13 @@ Function un.nsUninstaller_create
         Pop $check_RemoveShortcuts
     ${NSD_CreateCheckbox} 24u 66u -28u 10u "Remove PWAD associations"
         Pop $check_RemoveAssociations
-    ${NSD_CreateCheckbox} 24u 78u -28u 10u "Remove static Doomseeker configuration"
+    ${NSD_CreateCheckbox} 24u 78u -28u 10u "Remove association for zan://... links"
+        Pop $check_RemoveUrlSchemeAssociations
+    ${NSD_CreateCheckbox} 24u 90u -28u 10u "Remove static Doomseeker configuration"
         Pop $check_RemoveConfig
     ${NSD_SETCHECK} $check_RemoveShortcuts 1
     ${NSD_SETCHECK} $check_RemoveAssociations 1    
+    ${NSD_SETCHECK} $check_RemoveUrlSchemeAssociations 1
 	${NSD_SETCHECK} $check_RemoveConfig 0
     
     nsDialogs::Show
@@ -130,6 +137,7 @@ FunctionEnd
 Function un.nsUninstaller_exit
     ${NSD_GetState} $check_RemoveShortcuts $shouldRemoveShortcuts
     ${NSD_GetState} $check_RemoveAssociations $shouldRemoveAssociations
+    ${NSD_GetState} $check_RemoveUrlSchemeAssociations $shouldRemoveUrlSchemeAssociations
     ${NSD_GetState} $check_RemoveConfig $shouldRemoveDSConfig
 FunctionEnd
 
@@ -168,29 +176,34 @@ Function nsAllInOne_create
         SetCtlColors $0 "" "${MUI_BGCOLOR}"
     
     # Create the install directory group.
-    ${NSD_CreateGroupBox} 140u 128u -155u 32u "Install into"
+    ${NSD_CreateGroupBox} 140u 108u -155u 32u "Install into"
         Pop $0
         SetCtlColors $0 "" "${MUI_BGCOLOR}"
-        ${NSD_CreateDirRequest} 148u 140u -222u 12u $INSTDIR
+        ${NSD_CreateDirRequest} 148u 120u -222u 12u $INSTDIR
             Pop $textbox_Path
             SetCtlColors $textbox_Path "" "${MUI_BGCOLOR}"
-        ${NSD_CreateBrowseButton} -68u 139u 48u 14u "Browse..."
+        ${NSD_CreateBrowseButton} -68u 119u 48u 14u "Browse..."
             Pop $button_Browse
             SetCtlColors $button_Browse "" "${MUI_BGCOLOR}"
             GetFunctionAddress $0 OfflineFileBrowseButton
             nsDialogs::OnClick /NOUNLOAD $button_Browse $0
             
     # Create the check boxes for extra settings.
-    ${NSD_CreateCheckbox} 144u 168u 86u 10u "Portable installation"
+    ${NSD_CreateCheckbox} 144u 148u 86u 12u "Portable installation"
         Pop $check_PortableInstall
         SetCtlColors $check_PortableInstall "" "${MUI_BGCOLOR}"
         ${NSD_OnClick} $check_PortableInstall nsAllInOne_checkPortable
 		${NSD_SETCHECK} $check_PortableInstall 0
-    ${NSD_CreateCheckbox} -100u 168u 86u 10u "Associate PWAD files"
+    ${NSD_CreateCheckbox} 144u 160u 86u 12u "Associate PWAD files"
         Pop $check_Associate
         SetCtlColors $check_Associate "" "${MUI_BGCOLOR}"  
         ${NSD_OnClick} $check_Associate nsAllInOne_checkPortable
 		${NSD_SETCHECK} $check_Associate 1
+    ${NSD_CreateCheckbox} 144u 172u 150u 12u "Associate zan://... links with Doomseeker"
+        Pop $check_AssociateUrlScheme
+        SetCtlColors $check_AssociateUrlScheme "" "${MUI_BGCOLOR}"
+        ${NSD_OnClick} $check_AssociateUrlScheme nsAllInOne_checkPortable
+        ${NSD_SETCHECK} $check_AssociateUrlScheme 1
 		
     nsDialogs::Show
     
@@ -206,9 +219,12 @@ Function nsAllInOne_checkPortable
 		${NSD_SetText} $0 "Extract"
 		${NSD_SETCHECK} $check_Associate 0
 		EnableWindow $check_Associate 0
+		${NSD_SETCHECK} $check_AssociateUrlScheme 0
+		EnableWindow $check_AssociateUrlScheme 0
 	${Else}
 		${NSD_SetText} $0 "Install"
 		EnableWindow $check_Associate 1
+		EnableWindow $check_AssociateUrlScheme 1
 	${EndIf}
 FunctionEnd
 
@@ -226,6 +242,7 @@ Function nsAllInOne_exit
     ${NSD_GetText} $textbox_Path $INSTDIR
     ${NSD_GetState} $check_PortableInstall $portableInstallation    
     ${NSD_GetState} $check_Associate $shouldAssociate
+    ${NSD_GetState} $check_AssociateUrlScheme $shouldAssociateUrlScheme
 FunctionEnd
 
 #===================================================
