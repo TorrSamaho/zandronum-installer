@@ -47,6 +47,14 @@
 			!insertmacro APP_ASSOCIATE "wad" "Doom.wadfile" "Doom data file" "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
 			!insertmacro APP_ASSOCIATE "pk3" "ZDoom.wadfile" "ZDoom data file" "$INSTDIR\zandronum.exe,0" "Play with Zandronum" "$INSTDIR\zandronum.exe $\"%1$\""
 		${EndIf}
+
+        # Associate zan://... links
+        ${If} $shouldAssociateUrlScheme == 1
+            DetailPrint "Associating zan:// links..."
+            WriteRegStr HKCR "zan" "" "URL:zandronum"
+            WriteRegStr HKCR "zan" "URL Protocol" ""
+            WriteRegStr HKCR "zan\shell\open\command" "" "$INSTDIR\Doomseeker\doomseeker.exe --connect $\"%1$\""
+        ${EndIf}
     ${EndIf}
     
     # Create exceptions in Windows Firewall. (All Networks - All IP Version - Enabled)

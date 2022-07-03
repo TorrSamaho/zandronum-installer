@@ -31,6 +31,11 @@
         !insertmacro APP_UNASSOCIATE "wad" "Doom.wadfile"
         !insertmacro APP_UNASSOCIATE "pk3" "ZDoom.wadfile"
     ${EndIf}
+
+    # Remove zan://... link associations
+    ${If} $shouldRemoveUrlSchemeAssociations == 1
+        DeleteRegKey HKCR "zan"
+    ${EndIf}
 	
     # Remove firewall exceptions.
     # !insertmacro REMOVE_FIREWALL_EXCEPTION "$INSTDIR\zandronum.exe" "Zandronum"
